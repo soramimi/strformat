@@ -7,6 +7,8 @@ void test_(char const *text, std::string const &result, std::string const &answe
 
 void test()
 {
+	// f
+
 	TEST(strformat("%.*f").f(0, -1, 0)
 		 , "0");
 	TEST(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 0)
@@ -128,5 +130,37 @@ void test()
 		 , "(123.4560       )");
 	TEST(strformat("(%+0*.*f)").f(123.456, 15, 4)
 		 , "(+000000123.4560)");
+
+	// c
+
+	TEST(strformat("(%c)").c(65)
+		 , "(A)");
+	TEST(strformat("(%10c)").c(65)
+		 , "(         A)");
+	TEST(strformat("(%010c)").c(65)
+		 , "(000000000A)");
+	TEST(strformat("(%-10c)").c(65)
+		 , "(A         )");
+	TEST(strformat("(%*c)").c(65, 10)
+		 , "(         A)");
+	TEST(strformat("(%0*c)").c(65, 10)
+		 , "(000000000A)");
+	TEST(strformat("(%-*c)").c(65, 10)
+		 , "(A         )");
+	TEST(strformat("%%%c%c%c%%").c(65).c(66).c(67)
+		 , "%ABC%");
+
+	// s
+
+	TEST(strformat("(%s)").s("hoge")
+		 , "(hoge)");
+	TEST(strformat("(%10s)").s("hoge")
+		 , "(      hoge)");
+	TEST(strformat("(%-10s)").s("hoge")
+		 , "(hoge      )");
+	TEST(strformat("(%010s)").s("hoge")
+		 , "(000000hoge)");
+
+
 }
 
