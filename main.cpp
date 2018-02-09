@@ -11,16 +11,16 @@ int passed = 0;
 int failed = 0;
 int total = 0;
 
-void test_(char const *text, std::string const &result, std::string const &answer, bool show)
+void test_(char const *text, std::string const &result, const char *answer1, const char *answer2, bool show)
 {
 	total++;
 	if (show) strformat("#%5d %s\n").d(total).s(text).out();
 
-	if (result == answer) {
-		if (show) strformat("[pass] %s\n").s(answer).out();
+	if (result == answer1 || (answer2 && result == answer2)) {
+		if (show) strformat("[pass] %s\n").s(answer1).out();
 		passed++;
 	} else {
-		if (show) strformat("[fail] expected '%s'\n , but returned '%s'\n").s(answer).s(result).out();
+		if (show) strformat("[fail] expected '%s'\n , but returned '%s'\n").s(answer1).s(result).out();
 		failed++;
 	}
 }

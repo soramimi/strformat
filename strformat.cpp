@@ -619,7 +619,7 @@ Part *strformat::format_x64(int64_t value, int hint)
 	return format_hex64(value, upper_);
 }
 
-inline Part *strformat::format_(char c, int hint)
+Part *strformat::format_(char c, int hint)
 {
 	return format_((int32_t)c, hint);
 }
