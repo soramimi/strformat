@@ -111,7 +111,7 @@ public:
 	}
 	strformat &p(void *value, int width = -1, int precision = -1);
 	void vec(std::vector<char> *vec);
-	void render(std::function<void(char const *ptr, int len)> dst);
+	void render(std::function<void (char const *ptr, int len)> dst);
 	void write_to(FILE *fp);
 	void write_to(int fd);
 	void out();

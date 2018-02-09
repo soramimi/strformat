@@ -1,11 +1,11 @@
 
 #include "strformat.h"
 
-void test_(char const *text, std::string const &result, std::string const &answer);
+void test_(char const *text, std::string const &result, std::string const &answer, bool show);
 
-#define TEST(Q, A) test_(#Q, (Q).str(), A)
+#define TEST(Q, A) test_(#Q, (Q).str(), A, show)
 
-void test()
+void test(bool show)
 {
 	// f
 
@@ -160,7 +160,5 @@ void test()
 		 , "(hoge      )");
 	TEST(strformat("(%010s)").s("hoge")
 		 , "(000000hoge)");
-
-
 }
 

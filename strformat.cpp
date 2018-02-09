@@ -127,7 +127,7 @@ Part *format_double(double val, int precision, bool trim_fractional_zeros, bool 
 	int significant = std::min(length, 17);
 	double adjust = pow(10.0, -significant) * 5;
 
-	char *ptr = (char *)alloca(length + 4) + 3;
+	char *ptr = (char *)alloca(length + 4 + (pt < 0 ? -pt : 0)) + 3;
 	char *end = ptr;
 	char *dot = nullptr;
 
@@ -192,13 +192,7 @@ Part *format_double(double val, int precision, bool trim_fractional_zeros, bool 
 		}
 	}
 
-	if (end - ptr > 50) {
-		int n = end - ptr;
-		return alloc_part(ptr, n);
-	} else {
-		return alloc_part(ptr, end);
-	}
-
+	return alloc_part(ptr, end);
 }
 
 Part *format_f(double val, int precision, bool trim_fractional_zeros, bool force_sign)
@@ -882,7 +876,7 @@ void strformat::vec(std::vector<char> *vec)
 	}
 }
 
-void strformat::render(std::function<void(char const *ptr, int len)> dst)
+void strformat::render(std::function<void (char const *, int)> dst)
 {
 	std::vector<char> v;
 	vec(&v);
