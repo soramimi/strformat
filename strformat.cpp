@@ -27,14 +27,14 @@ using PartList= strformat::helper::PartList;
 static char hex_lower[] = "0123456789abcdef";
 static char hex_upper[] = "0123456789ABCDEF";
 
-Part *alloc_part(char const *begin, int size)
+Part *alloc_part(char const *data, int size)
 {
 	void *v = malloc(sizeof(Part) + size + 1);
 	Part *p = (Part *)v;
 	p->next = nullptr;
 	p->data = (char *)v + sizeof(Part);
 	p->size = size;
-	memcpy(p->data, begin, size);
+	memcpy(p->data, data, size);
 	p->data[size] = 0;
 	return p;
 }
@@ -73,6 +73,18 @@ void add_part(PartList *list, Part *p)
 		}
 		list->last = p;
 	}
+}
+
+void free_list(PartList *list)
+{
+	Part *p = list->head;
+	while (p) {
+		Part *next = p->next;
+		free_part(&p);
+		p = next;
+	}
+	list->head = nullptr;
+	list->last = nullptr;
 }
 
 void add_chars(PartList *list, char c, int n)
@@ -546,7 +558,7 @@ bool strformat::advance_()
 
 inline void strformat::clear()
 {
-	free_part(&list_.head);
+	free_list(&list_);
 }
 
 inline Part *strformat::format_f_(double value, bool trim_fractional_zeros)
