@@ -35,7 +35,7 @@ int main()
 #if 1
 	test(true);
 	print_result();
-#elif 1
+#elif 0
 
 #ifdef _WIN32
 	DWORD ms = GetTickCount();
@@ -48,10 +48,10 @@ int main()
 #endif
 
 #else
-	char const *fmt = "%.4f\n";
+	char const *fmt = "%p\n";
 	double val = 123.456;
-	printf(fmt, val);
-	strformat(fmt).f(val).out();
+	printf(fmt, (void *)0x0123abcd);
+	strformat(fmt).p((void *)0x0123abcd).out();
 #endif
 	return 0;
 }

@@ -160,5 +160,12 @@ void test(bool show)
 		 , "(hoge      )");
 	TEST(strformat("(%010s)").s("hoge")
 		 , "(000000hoge)");
+
+	// p
+
+	TEST(strformat("(%p)").p((void *)0x0123abcd)
+		 , "(0123ABCD)");
+
+
 }
 

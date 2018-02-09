@@ -394,20 +394,17 @@ Part *format_hex64(uint64_t val, bool upper)
 
 Part *format_pointer(void *val)
 {
-	int n = 30;
+	int n = sizeof(uintptr_t) * 2 + 1;
 	char *end = (char *)alloca(n) + n - 1;
 	char *ptr = end;
 	*end = 0;
 
 	uintptr_t v = (uintptr_t)val;
 	for (int i = 0; i < sizeof(uintptr_t) * 2; i++) {
-		int c = hex_lower[v & 15];
+		int c = hex_upper[v & 15];
 		v >>= 4;
 		*--ptr = c;
 	}
-
-	*--ptr = 'x';
-	*--ptr = '0';
 
 	return alloc_part(ptr, end);
 }
