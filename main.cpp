@@ -48,10 +48,10 @@ int main()
 #endif
 
 #else
-	char const *fmt = "%p\n";
-	double val = 123.456;
-	printf(fmt, (void *)0x0123abcd);
-	strformat(fmt).p((void *)0x0123abcd).out();
+	char const *fmt = "%010s\n";
+	char const *val = "";
+	printf(fmt, val);
+	strformat(fmt).s(val).out();
 #endif
 	return 0;
 }

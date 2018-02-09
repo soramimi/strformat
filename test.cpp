@@ -161,10 +161,26 @@ void test(bool show)
 		 , "(hoge      )");
 	TEST1(strformat("(%010s)").s("hoge")
 		 , "(000000hoge)");
+	TEST1(strformat("(%s)").s("")
+		 , "()");
+	TEST1(strformat("(%s)").s(std::string())
+		 , "()");
+	TEST1(strformat("(%s)").s(nullptr)
+		 , "((null))");
+	TEST1(strformat("(%010s)").s("")
+		 , "(0000000000)");
+	TEST1(strformat("(%010s)").s(std::string())
+		 , "(0000000000)");
 
 	// p
 
 	TEST1(strformat("(%p)").p((void *)0x0123abcd)
 		 , "(0123ABCD)");
+	TEST1(strformat("(%10p)").p((void *)0x0123abcd)
+		 , "(  0123ABCD)");
+	TEST1(strformat("(%-10p)").p((void *)0x0123abcd)
+		 , "(0123ABCD  )");
+	TEST1(strformat("(%010p)").p((void *)0x0123abcd)
+		 , "(000123ABCD)");
 }
 

@@ -16,16 +16,16 @@
 class strformat::helper {
 public:
 	using Part = strformat::Part;
-	using PartList= strformat::PartList;
+	using PartList = strformat::PartList;
 };
 
 namespace {
 
 using Part = strformat::helper::Part;
-using PartList= strformat::helper::PartList;
+using PartList = strformat::helper::PartList;
 
-static char hex_lower[] = "0123456789abcdef";
-static char hex_upper[] = "0123456789ABCDEF";
+static char digits_lower[] = "0123456789abcdef";
+static char digits_upper[] = "0123456789ABCDEF";
 
 Part *alloc_part(char const *data, int size)
 {
@@ -62,16 +62,16 @@ void free_part(Part **p)
 	}
 }
 
-void add_part(PartList *list, Part *p)
+void add_part(PartList *list, Part *part)
 {
-	if (p) {
+	if (part) {
 		if (!list->head) {
-			list->head = p;
+			list->head = part;
 		}
 		if (list->last) {
-			list->last->next = p;
+			list->last->next = part;
 		}
-		list->last = p;
+		list->last = part;
 	}
 }
 
@@ -99,7 +99,7 @@ void add_chars(PartList *list, char c, int n)
 	add_part(list, p);
 }
 
-Part *format_double(double val, int precision, bool trim_fractional_zeros, bool force_sign)
+Part *format_double(double val, int precision, bool trim_unnecessary_zeros, bool force_sign)
 {
 #ifdef _MSC_VER
 	switch (_fpclass(val)) {
@@ -190,7 +190,7 @@ Part *format_double(double val, int precision, bool trim_fractional_zeros, bool 
 		*--ptr = '+';
 	}
 
-	if (trim_fractional_zeros && dot) {
+	if (trim_unnecessary_zeros && dot) {
 		while (dot < end) {
 			char c = end[-1];
 			if (c == '.') {
@@ -205,11 +205,6 @@ Part *format_double(double val, int precision, bool trim_fractional_zeros, bool 
 	}
 
 	return alloc_part(ptr, end);
-}
-
-Part *format_f(double val, int precision, bool trim_fractional_zeros, bool force_sign)
-{
-	return format_double(val, precision, trim_fractional_zeros, force_sign);
 }
 
 Part *format_int32(int32_t val, bool force_sign)
@@ -323,13 +318,13 @@ Part *format_oct32(uint32_t val, bool upper)
 	char *ptr = end;
 	*end = 0;
 
-	char const *oct = upper ? hex_upper : hex_lower;
+	char const *digits = upper ? digits_upper : digits_lower;
 
 	if (val == 0) {
 		*--ptr = '0';
 	} else {
 		while (val != 0) {
-			int c = oct[val & 7];
+			char c = digits[val & 7];
 			val >>= 3;
 			*--ptr = c;
 		}
@@ -345,13 +340,13 @@ Part *format_oct64(uint64_t val, bool upper)
 	char *ptr = end;
 	*end = 0;
 
-	char const *oct = upper ? hex_upper : hex_lower;
+	char const *digits = upper ? digits_upper : digits_lower;
 
 	if (val == 0) {
 		*--ptr = '0';
 	} else {
 		while (val != 0) {
-			int c = oct[val & 7];
+			char c = digits[val & 7];
 			val >>= 3;
 			*--ptr = c;
 		}
@@ -367,13 +362,13 @@ Part *format_hex32(uint32_t val, bool upper)
 	char *ptr = end;
 	*end = 0;
 
-	char const *hex = upper ? hex_upper : hex_lower;
+	char const *digits = upper ? digits_upper : digits_lower;
 
 	if (val == 0) {
 		*--ptr = '0';
 	} else {
 		while (val != 0) {
-			int c = hex[val & 15];
+			char c = digits[val & 15];
 			val >>= 4;
 			*--ptr = c;
 		}
@@ -389,13 +384,13 @@ Part *format_hex64(uint64_t val, bool upper)
 	char *ptr = end;
 	*end = 0;
 
-	char const *hex = upper ? hex_upper : hex_lower;
+	char const *digits = upper ? digits_upper : digits_lower;
 
 	if (val == 0) {
 		*--ptr = '0';
 	} else {
 		while (val != 0) {
-			int c = hex[val & 15];
+			char c = digits[val & 15];
 			val >>= 4;
 			*--ptr = c;
 		}
@@ -413,7 +408,7 @@ Part *format_pointer(void *val)
 
 	uintptr_t v = (uintptr_t)val;
 	for (int i = 0; i < sizeof(uintptr_t) * 2; i++) {
-		int c = hex_upper[v & 15];
+		char c = digits_upper[v & 15];
 		v >>= 4;
 		*--ptr = c;
 	}
@@ -527,7 +522,12 @@ strformat::~strformat()
 	clear();
 }
 
-bool strformat::advance_()
+inline void strformat::clear()
+{
+	free_list(&list_);
+}
+
+bool strformat::advance()
 {
 	bool r = false;
 	auto Flush = [&](){
@@ -556,15 +556,10 @@ bool strformat::advance_()
 	return r;
 }
 
-inline void strformat::clear()
-{
-	free_list(&list_);
-}
-
-inline Part *strformat::format_f_(double value, bool trim_fractional_zeros)
+inline Part *strformat::format_f(double value, bool trim_unnecessary_zeros)
 {
 	int pr = precision_ < 0 ? 6 : precision_;
-	return format_f(value, pr, trim_fractional_zeros, force_sign_);
+	return format_double(value, pr, trim_unnecessary_zeros, force_sign_);
 }
 
 inline Part *strformat::format_c(char c)
@@ -577,10 +572,10 @@ Part *strformat::format_o32(int32_t value, int hint)
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int32_t)value, 0);
-		case 'u': return format_((uint32_t)value, 0);
+		case 'd': return format((int32_t)value, 0);
+		case 'u': return format((uint32_t)value, 0);
 		case 'x': return format_x32((uint32_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_oct32(value, upper_);
@@ -591,10 +586,10 @@ Part *strformat::format_o64(int64_t value, int hint)
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int64_t)value, 0);
-		case 'u': return format_((uint64_t)value, 0);
+		case 'd': return format((int64_t)value, 0);
+		case 'u': return format((uint64_t)value, 0);
 		case 'x': return format_x64((uint64_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_oct64(value, upper_);
@@ -605,10 +600,10 @@ Part *strformat::format_x32(int32_t value, int hint)
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int32_t)value, 0);
-		case 'u': return format_((uint32_t)value, 0);
+		case 'd': return format((int32_t)value, 0);
+		case 'u': return format((uint32_t)value, 0);
 		case 'o': return format_o32((uint32_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_hex32(value, upper_);
@@ -619,92 +614,92 @@ Part *strformat::format_x64(int64_t value, int hint)
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int64_t)value, 0);
-		case 'u': return format_((uint64_t)value, 0);
+		case 'd': return format((int64_t)value, 0);
+		case 'u': return format((uint64_t)value, 0);
 		case 'o': return format_o64((uint64_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_hex64(value, upper_);
 }
 
-Part *strformat::format_(char c, int hint)
+Part *strformat::format(char c, int hint)
 {
-	return format_((int32_t)c, hint);
+	return format((int32_t)c, hint);
 }
 
-Part *strformat::format_(double value, int hint)
+Part *strformat::format(double value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int64_t)value, 0);
-		case 'u': return format_((uint64_t)value, 0);
+		case 'd': return format((int64_t)value, 0);
+		case 'u': return format((uint64_t)value, 0);
 		case 'o': return format_o64((uint64_t)value, 0);
 		case 'x': return format_x64((uint64_t)value, 0);
-		case 's': return format_f_(value, true);
+		case 's': return format_f(value, true);
 		}
 	}
-	return format_f_(value, false);
+	return format_f(value, false);
 }
 
-Part *strformat::format_(int32_t value, int hint)
+Part *strformat::format(int32_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'u': return format_((uint32_t)value, 0);
+		case 'u': return format((uint32_t)value, 0);
 		case 'o': return format_o32((uint32_t)value, 0);
 		case 'x': return format_x32((uint32_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_int32(value, force_sign_);
 }
 
-Part *strformat::format_(uint32_t value, int hint)
+Part *strformat::format(uint32_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int32_t)value, 0);
+		case 'd': return format((int32_t)value, 0);
 		case 'o': return format_o32((uint32_t)value, 0);
 		case 'x': return format_x32((uint32_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_uint32(value);
 }
 
-Part *strformat::format_(int64_t value, int hint)
+Part *strformat::format(int64_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'u': return format_((uint64_t)value, 0);
+		case 'u': return format((uint64_t)value, 0);
 		case 'o': return format_o64((uint64_t)value, 0);
 		case 'x': return format_x64((uint64_t)value, 0);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_int64(value, force_sign_);
 }
 
-Part *strformat::format_(uint64_t value, int hint)
+Part *strformat::format(uint64_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
-		case 'd': return format_((int64_t)value, 0);
+		case 'd': return format((int64_t)value, 0);
 		case 'o': return format_oct64(value, false);
 		case 'x': return format_hex64(value, false);
-		case 'f': return format_((double)value, 0);
+		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_uint64(value);
 }
 
-Part *strformat::format_(const char *value, int hint)
+Part *strformat::format(const char *value, int hint)
 {
 	if (!value) {
 		return alloc_part("(null)");
@@ -712,37 +707,42 @@ Part *strformat::format_(const char *value, int hint)
 	if (hint) {
 		switch (hint) {
 		case 'c':
-			return format_(num<char>(value), hint);
+			return format(num<char>(value), hint);
 		case 'd':
 			if (lflag_ == 0) {
-				return format_(num<int32_t>(value), 0);
+				return format(num<int32_t>(value), 0);
 			} else {
-				return format_(num<int64_t>(value), 0);
+				return format(num<int64_t>(value), 0);
 			}
 		case 'u': case 'o': case 'x':
 			if (lflag_ == 0) {
-				return format_(num<uint32_t>(value), hint);
+				return format(num<uint32_t>(value), hint);
 			} else {
-				return format_(num<uint64_t>(value), hint);
+				return format(num<uint64_t>(value), hint);
 			}
 		case 'f':
-			return format_(num<double>(value), hint);
+			return format(num<double>(value), hint);
 		}
 	}
 	return alloc_part(value, value + strlen(value));
 }
 
-Part *strformat::format_(const std::string &value, int hint)
+Part *strformat::format(const std::string &value, int hint)
 {
 	if (hint == 's') {
 		return alloc_part(value);
 	}
-	return format_(value.c_str(), hint);
+	return format(value.c_str(), hint);
 }
 
-strformat &strformat::format(std::function<Part *(int)> callback, int width, int precision)
+Part *strformat::format_p(void *val)
 {
-	if (advance_()) {
+	return format_pointer(val);
+}
+
+void strformat::format(std::function<Part *(int)> callback, int width, int precision)
+{
+	if (advance()) {
 		if (*next_ == '%') {
 			next_++;
 		}
@@ -838,7 +838,6 @@ strformat &strformat::format(std::function<Part *(int)> callback, int width, int
 
 		head_ = next_;
 	}
-	return *this;
 }
 
 strformat &strformat::reset()
@@ -855,26 +854,23 @@ void strformat::destroy()
 	reset();
 }
 
-strformat &strformat::add(const std::string &s)
+strformat &strformat::append(const std::string &s)
 {
 	text_ += s;
 	return *this;
 }
 
-strformat &strformat::add(const char *s)
+strformat &strformat::append(const char *s)
 {
 	text_ += s;
 	return *this;
 }
 
-strformat &strformat::p(void *value, int width, int precision)
-{
-	return format([&](int){ return format_pointer(value); }, width, precision);
-}
+
 
 void strformat::vec(std::vector<char> *vec)
 {
-	advance_();
+	advance();
 	int len = 0;
 	for (Part *p = list_.head; p; p = p->next) {
 		len += p->size;
