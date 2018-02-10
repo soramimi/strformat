@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 
 #ifdef _MSC_VER
@@ -115,8 +115,8 @@ Part *format_double(double val, int precision, bool trim_unnecessary_zeros, bool
 		break;
 	}
 #else
-	if (isnan(val)) return alloc_part("#NAN");
-	if (isinf(val)) return alloc_part("#INF");
+	if (std::isnan(val)) return alloc_part("#NAN");
+	if (std::isinf(val)) return alloc_part("#INF");
 #endif
 
 	bool sign = val < 0;

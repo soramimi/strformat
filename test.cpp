@@ -174,13 +174,13 @@ void test(bool show)
 
 	// p
 
-	TEST1(strformat("(%p)").p((void *)0x0123abcd)
-		 , "(0123ABCD)");
-	TEST1(strformat("(%10p)").p((void *)0x0123abcd)
-		 , "(  0123ABCD)");
-	TEST1(strformat("(%-10p)").p((void *)0x0123abcd)
-		 , "(0123ABCD  )");
-	TEST1(strformat("(%010p)").p((void *)0x0123abcd)
-		 , "(000123ABCD)");
+	TEST2(strformat("(%p)").p((void *)0x0123abcd)
+		 , "(0123ABCD)", "(000000000123ABCD)");
+	TEST2(strformat("(%20p)").p((void *)0x0123abcd)
+		 , "(            0123ABCD)", "(    000000000123ABCD)");
+	TEST2(strformat("(%-20p)").p((void *)0x0123abcd)
+		 , "(0123ABCD            )", "(000000000123ABCD    )");
+	TEST1(strformat("(%020p)").p((void *)0x0123abcd)
+		 , "(0000000000000123ABCD)");
 }
 
