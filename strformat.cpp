@@ -407,7 +407,7 @@ Part *format_pointer(void *val)
 	*end = 0;
 
 	uintptr_t v = (uintptr_t)val;
-	for (int i = 0; i < sizeof(uintptr_t) * 2; i++) {
+	for (int i = 0; i < (int)sizeof(uintptr_t) * 2; i++) {
 		char c = digits_upper[v & 15];
 		v >>= 4;
 		*--ptr = c;
@@ -771,21 +771,23 @@ void strformat::format(std::function<Part *(int)> callback, int width, int preci
 
 		auto GetNumber = [&](int alternate_value){
 			int value = -1;
-			while (1) {
-				int c = (unsigned char)*next_;
-				if (c == '*') {
-					value = alternate_value;
-					next_++;
-					break;
-				}
-				if (!isdigit(c)) break;
-				if (value < 0) {
-					value = 0;
-				} else {
-					value *= 10;
-				}
-				value += c - '0';
+			if (*next_ == '*') {
 				next_++;
+			} else {
+				while (1) {
+					int c = (unsigned char)*next_;
+					if (!isdigit(c)) break;
+					if (value < 0) {
+						value = 0;
+					} else {
+						value *= 10;
+					}
+					value += c - '0';
+					next_++;
+				}
+			}
+			if (value < 0) {
+				value = alternate_value;
 			}
 			return value;
 		};

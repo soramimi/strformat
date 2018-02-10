@@ -124,6 +124,11 @@ public:
 		return *this;
 	}
 
+	template <typename T> strformat &operator () (T const &value, int width = -1, int precision = -1)
+	{
+		return a(value, width, precision);
+	}
+
 	void vec(std::vector<char> *vec);
 	void render(std::function<void (char const *ptr, int len)> dst);
 	void write_to(FILE *fp);

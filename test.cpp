@@ -8,6 +8,11 @@ void test_(char const *text, std::string const &result, char const *answer1, cha
 
 void test(bool show)
 {
+	// operator ()
+
+	TEST1(strformat("(%0*.*f)")(123.456789, 10, 2)
+		 , "(0000123.46)");
+
 	// f
 
 	TEST1(strformat("%.*f").f(0, -1, 0)

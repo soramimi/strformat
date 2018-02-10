@@ -48,10 +48,10 @@ int main()
 #endif
 
 #else
-	char const *fmt = "%010s\n";
-	char const *val = "";
-	printf(fmt, val);
-	strformat(fmt).s(val).out();
+	char const *fmt = "(%0*.*f)\n";
+	double val = 123.456789;
+	printf(fmt, 10, 2, val);
+	strformat(fmt)(val, 10, 2).out();
 #endif
 	return 0;
 }
