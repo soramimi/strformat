@@ -13,8 +13,8 @@ public:
 private:
 	struct Part {
 		Part *next;
-		char *data;
 		int size;
+		char data[1];
 	};
 	struct PartList {
 		Part *head = nullptr;

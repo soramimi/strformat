@@ -29,10 +29,8 @@ static char digits_upper[] = "0123456789ABCDEF";
 
 Part *alloc_part(char const *data, int size)
 {
-	void *v = malloc(sizeof(Part) + size + 1);
-	Part *p = (Part *)v;
+	Part *p = (Part *)malloc(sizeof(Part) + size);
 	p->next = nullptr;
-	p->data = (char *)v + sizeof(Part);
 	p->size = size;
 	memcpy(p->data, data, size);
 	p->data[size] = 0;
@@ -89,10 +87,8 @@ void free_list(PartList *list)
 
 void add_chars(PartList *list, char c, int n)
 {
-	void *v = malloc(sizeof(Part) + n + 1);
-	Part *p = (Part *)v;
+	Part *p = (Part *)malloc(sizeof(Part) + n);
 	p->next = nullptr;
-	p->data = (char *)v + sizeof(Part);
 	p->size = n;
 	memset(p->data, c, n);
 	p->data[n] = 0;
