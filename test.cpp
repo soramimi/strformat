@@ -262,6 +262,49 @@ void test(bool show)
 	TEST1(strformat("(%+0*.*f)").f(-123.456, 15, 4)
 		 , "(-000000123.4560)");
 
+	// f (string)
+
+	TEST1(strformat("(%f)").s("")
+		 , "(0.000000)");
+	TEST1(strformat("(%f)").s("123")
+		 , "(123.000000)");
+	TEST1(strformat("(%f)").s("123.")
+		 , "(123.000000)");
+	TEST1(strformat("(%f)").s(".123")
+		 , "(0.123000)");
+	TEST1(strformat("(%f)").s("+.123")
+		 , "(0.123000)");
+	TEST1(strformat("(%f)").s("123.456")
+		 , "(123.456000)");
+	TEST1(strformat("(%+f)").s("123.456")
+		 , "(+123.456000)");
+	TEST1(strformat("(%+f)").s("+123.456")
+		 , "(+123.456000)");
+	TEST1(strformat("(%f)").s("-123.456")
+		 , "(-123.456000)");
+	TEST1(strformat("(%f)").s("123,456")
+		 , "(123.000000)");
+	TEST1(strformat("(%f)").s("0x50")
+		 , "(80.000000)");
+	TEST1(strformat("(%+f)").s("0x50")
+		 , "(+80.000000)");
+	TEST1(strformat("(%+f)").s("+0x50")
+		 , "(+80.000000)");
+	TEST1(strformat("(%f)").s("-0x50")
+		 , "(-80.000000)");
+	TEST1(strformat("(%f)").s("0x50.5")
+		 , "(80.000000)");
+	TEST1(strformat("(%f)").s("0755")
+		 , "(493.000000)");
+	TEST1(strformat("(%+f)").s("0755")
+		 , "(+493.000000)");
+	TEST1(strformat("(%f)").s("-0755")
+		 , "(-493.000000)");
+	TEST1(strformat("(%f)").s("00755")
+		 , "(493.000000)");
+	TEST1(strformat("(%f)").s(nullptr)
+		 , "((null))");
+
 	// c
 
 	TEST1(strformat("(%c)").c(65)
@@ -284,6 +327,8 @@ void test(bool show)
 	// s
 
 	TEST1(strformat("(%s)").s("hoge")
+		 , "(hoge)");
+	TEST1(strformat("(%s)").s(std::string("hoge"))
 		 , "(hoge)");
 	TEST1(strformat("(%10s)").s("hoge")
 		 , "(      hoge)");
@@ -320,6 +365,8 @@ void test(bool show)
 
 	// p
 
+	TEST2(strformat("(%p)").p((void *)0)
+		 , "(00000000)", "(0000000000000000)");
 	TEST2(strformat("(%p)").p((void *)0x0123abcd)
 		 , "(0123ABCD)", "(000000000123ABCD)");
 	TEST2(strformat("(%20p)").p((void *)0x0123abcd)
@@ -327,6 +374,29 @@ void test(bool show)
 	TEST2(strformat("(%-20p)").p((void *)0x0123abcd)
 		 , "(0123ABCD            )", "(000000000123ABCD    )");
 	TEST1(strformat("(%020p)").p((void *)0x0123abcd)
+		 , "(0000000000000123ABCD)");
+
+	// p (abnormal)
+
+	TEST2(strformat("(%f)").p((void *)0)
+		 , "(00000000)", "(0000000000000000)");
+	TEST2(strformat("(%f)").p((void *)0x0123abcd)
+		 , "(0123ABCD)", "(000000000123ABCD)");
+	TEST2(strformat("(%20f)").p((void *)0x0123abcd)
+		 , "(            0123ABCD)", "(    000000000123ABCD)");
+	TEST2(strformat("(%-20f)").p((void *)0x0123abcd)
+		 , "(0123ABCD            )", "(000000000123ABCD    )");
+	TEST1(strformat("(%020f)").p((void *)0x0123abcd)
+		 , "(0000000000000123ABCD)");
+	TEST2(strformat("(%s)").p((void *)0)
+		 , "(00000000)", "(0000000000000000)");
+	TEST2(strformat("(%s)").p((void *)0x0123abcd)
+		 , "(0123ABCD)", "(000000000123ABCD)");
+	TEST2(strformat("(%20s)").p((void *)0x0123abcd)
+		 , "(            0123ABCD)", "(    000000000123ABCD)");
+	TEST2(strformat("(%-20s)").p((void *)0x0123abcd)
+		 , "(0123ABCD            )", "(000000000123ABCD    )");
+	TEST1(strformat("(%020s)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
 }
 
