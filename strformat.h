@@ -34,7 +34,7 @@ private:
 	int lflag_;
 
 	void clear();
-	bool advance();
+	bool advance(bool complete);
 	Part *format_f(double value, bool trim_fractional_zeros);
 	Part *format_c(char c);
 	Part *format_o32(int32_t value, int hint);

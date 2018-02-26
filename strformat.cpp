@@ -523,7 +523,7 @@ inline void strformat::clear()
 	free_list(&list_);
 }
 
-bool strformat::advance()
+bool strformat::advance(bool complete)
 {
 	bool r = false;
 	auto Flush = [&](){
@@ -540,6 +540,8 @@ bool strformat::advance()
 				Flush();
 				next_++;
 				head_ = next_;
+			} else if (complete) {
+				next_++;
 			} else {
 				r = true;
 				break;
@@ -738,7 +740,7 @@ Part *strformat::format_p(void *val)
 
 void strformat::format(std::function<Part *(int)> callback, int width, int precision)
 {
-	if (advance()) {
+	if (advance(false)) {
 		if (*next_ == '%') {
 			next_++;
 		}
@@ -868,7 +870,7 @@ strformat &strformat::append(const char *s)
 
 void strformat::vec(std::vector<char> *vec)
 {
-	advance();
+	advance(true);
 	int len = 0;
 	for (Part *p = list_.head; p; p = p->next) {
 		len += p->size;

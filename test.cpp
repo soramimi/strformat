@@ -302,6 +302,22 @@ void test(bool show)
 	TEST1(strformat("(%010s)").s(std::string())
 		 , "(0000000000)");
 
+	TEST1(strformat("%s%s%s").s("abc").s("def").s("ghi")
+		 , "abcdefghi");
+	TEST1(strformat("%s%s").s("abc").s("def").s("ghi")
+		 , "abcdef");
+	TEST1(strformat("%s%s%s%s").s("abc").s("def").s("ghi")
+		 , "abcdefghi%s");
+	TEST1(strformat("%s%s%s%s%").s("abc").s("def").s("ghi")
+		 , "abcdefghi%s%");
+	TEST1(strformat("%s%s%s%s%%").s("abc").s("def").s("ghi")
+		 , "abcdefghi%s%");
+	TEST1(strformat("%s%s%s%s%%%").s("abc").s("def").s("ghi")
+		 , "abcdefghi%s%%");
+	TEST1(strformat("%%%s%s%s%s%%").s("abc").s("def")
+		 , "%abcdef%s%s%");
+
+
 	// p
 
 	TEST2(strformat("(%p)").p((void *)0x0123abcd)
