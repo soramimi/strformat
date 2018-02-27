@@ -97,23 +97,8 @@ void add_chars(PartList *list, char c, int n)
 
 Part *format_double(double val, int precision, bool trim_unnecessary_zeros, bool force_sign)
 {
-#ifdef _MSC_VER
-	switch (_fpclass(val)) {
-	case _FPCLASS_PINF:
-	case _FPCLASS_NINF:
-		return alloc_part("#INF", nullptr);
-	case _FPCLASS_SNAN:
-	case _FPCLASS_QNAN:
-		return alloc_part("#NAN", nullptr);
-	case _FPCLASS_PZ:
-	case _FPCLASS_NZ:
-		val = 0;
-		break;
-	}
-#else
 	if (std::isnan(val)) return alloc_part("#NAN");
 	if (std::isinf(val)) return alloc_part("#INF");
-#endif
 
 	bool sign = val < 0;
 	if (sign) val = -val;

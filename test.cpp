@@ -305,6 +305,30 @@ void test(bool show)
 	TEST1(strformat("(%f)").s(nullptr)
 		 , "((null))");
 
+	// f (NAN/INF)
+
+	TEST1(strformat("(%f)").f(sqrt(-1))
+		 , "(#NAN)");
+	TEST1(strformat("(%10f)").f(sqrt(-1))
+		 , "(      #NAN)");
+	TEST1(strformat("(%+10f)").f(sqrt(-1))
+		 , "(      #NAN)");
+	TEST1(strformat("(%-10f)").f(sqrt(-1))
+		 , "(#NAN      )");
+	TEST1(strformat("(%010f)").f(sqrt(-1))
+		 , "(000000#NAN)");
+
+	TEST1(strformat("(%f)").f(log(0))
+		 , "(#INF)");
+	TEST1(strformat("(%10f)").f(log(0))
+		 , "(      #INF)");
+	TEST1(strformat("(%+10f)").f(log(0))
+		 , "(      #INF)");
+	TEST1(strformat("(%-10f)").f(log(0))
+		 , "(#INF      )");
+	TEST1(strformat("(%010f)").f(log(0))
+		 , "(000000#INF)");
+
 	// c
 
 	TEST1(strformat("(%c)").c(65)
@@ -398,5 +422,6 @@ void test(bool show)
 		 , "(0123ABCD            )", "(000000000123ABCD    )");
 	TEST1(strformat("(%020s)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
+
 }
 
