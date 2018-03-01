@@ -1,5 +1,6 @@
 
 #include "strformat.h"
+#include <cmath>
 
 void test_(char const *text, std::string const &result, char const *answer1, char const *answer2, bool show);
 
@@ -274,6 +275,8 @@ void test(bool show)
 		 , "(0.123000)");
 	TEST1(strformat("(%f)").s("+.123")
 		 , "(0.123000)");
+	TEST1(strformat("(%f)").s("-.123")
+		 , "(-0.123000)");
 	TEST1(strformat("(%f)").s("123.456")
 		 , "(123.456000)");
 	TEST1(strformat("(%+f)").s("123.456")
