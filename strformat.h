@@ -37,10 +37,10 @@ private:
 	bool advance(bool complete);
 	Part *format_f(double value, bool trim_fractional_zeros);
 	Part *format_c(char c);
-	Part *format_o32(int32_t value, int hint);
-	Part *format_o64(int64_t value, int hint);
-	Part *format_x32(int32_t value, int hint);
-	Part *format_x64(int64_t value, int hint);
+	Part *format_o32(uint32_t value, int hint);
+	Part *format_o64(uint64_t value, int hint);
+	Part *format_x32(uint32_t value, int hint);
+	Part *format_x64(uint64_t value, int hint);
 	Part *format(char c, int hint);
 	Part *format(double value, int hint);
 	Part *format(int32_t value, int hint);

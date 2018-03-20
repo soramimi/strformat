@@ -550,56 +550,56 @@ inline Part *strformat::format_c(char c)
 	return alloc_part(&c, &c + 1);
 }
 
-Part *strformat::format_o32(int32_t value, int hint)
+Part *strformat::format_o32(uint32_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
 		case 'd': return format((int32_t)value, 0);
-		case 'u': return format((uint32_t)value, 0);
-		case 'x': return format_x32((uint32_t)value, 0);
+		case 'u': return format(value, 0);
+		case 'x': return format_x32(value, 0);
 		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_oct32(value, upper_);
 }
 
-Part *strformat::format_o64(int64_t value, int hint)
+Part *strformat::format_o64(uint64_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
 		case 'd': return format((int64_t)value, 0);
-		case 'u': return format((uint64_t)value, 0);
-		case 'x': return format_x64((uint64_t)value, 0);
+		case 'u': return format(value, 0);
+		case 'x': return format_x64(value, 0);
 		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_oct64(value, upper_);
 }
 
-Part *strformat::format_x32(int32_t value, int hint)
+Part *strformat::format_x32(uint32_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
 		case 'd': return format((int32_t)value, 0);
-		case 'u': return format((uint32_t)value, 0);
-		case 'o': return format_o32((uint32_t)value, 0);
+		case 'u': return format(value, 0);
+		case 'o': return format_o32(value, 0);
 		case 'f': return format((double)value, 0);
 		}
 	}
 	return format_hex32(value, upper_);
 }
 
-Part *strformat::format_x64(int64_t value, int hint)
+Part *strformat::format_x64(uint64_t value, int hint)
 {
 	if (hint) {
 		switch (hint) {
 		case 'c': return format_c((char)value);
 		case 'd': return format((int64_t)value, 0);
-		case 'u': return format((uint64_t)value, 0);
-		case 'o': return format_o64((uint64_t)value, 0);
+		case 'u': return format(value, 0);
+		case 'o': return format_o64(value, 0);
 		case 'f': return format((double)value, 0);
 		}
 	}
