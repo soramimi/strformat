@@ -426,5 +426,17 @@ void test(bool show)
 	TEST1(strformat("(%020s)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
 
+
+	// c
+
+	TEST1(strformat("(%c)").c('A')
+		 , "(A)");
+	TEST1(strformat("(%c)").c(48)
+		 , "(0)");
+	TEST1(strformat("(%c)").s("49")
+		 , "(1)");
+	TEST1(strformat("(%c)").s("0x32")
+		 , "(2)");
+
 }
 

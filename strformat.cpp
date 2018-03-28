@@ -690,7 +690,7 @@ Part *strformat::format(const char *value, int hint)
 	if (hint) {
 		switch (hint) {
 		case 'c':
-			return format(num<char>(value), hint);
+			return format_c(num<char>(value));
 		case 'd':
 			if (lflag_ == 0) {
 				return format(num<int32_t>(value), 0);
