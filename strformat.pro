@@ -4,7 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    strformat.cpp \
 	main.cpp \
     test.cpp
 
