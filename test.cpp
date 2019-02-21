@@ -369,6 +369,12 @@ void test(bool show)
 		 , "()");
 	TEST1(strformat("(%s)").s(nullptr)
 		 , "((null))");
+	TEST1(strformat("(%10s)").s(nullptr)
+		, "(    (null))");
+	TEST1(strformat("(%-10s)").s(nullptr)
+		, "((null)    )");
+	TEST1(strformat("(%010s)").s(nullptr)
+		, "(0000(null))");
 	TEST1(strformat("(%010s)").s("")
 		 , "(0000000000)");
 	TEST1(strformat("(%010s)").s(std::string())
