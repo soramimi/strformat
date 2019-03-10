@@ -21,9 +21,100 @@
 #include <unistd.h>
 #endif
 
-class strformat {
+namespace strformat_ns {
+
+struct NumberParser {
+	char const *p;
+	bool sign = false;
+	int radix = 10;
+	NumberParser(char const *ptr)
+		: p(ptr)
+	{
+		while (isspace((unsigned char)*p)) {
+			p++;
+		}
+		if (*p == '+') {
+			p++;
+		} else if (*p == '-') {
+			sign = true;
+			p++;
+		}
+		if (p[0] == '0') {
+			if (p[1] == 'x') {
+				p += 2;
+				radix = 16;
+			} else {
+				int i = 1;
+				while (1) {
+					int c = (unsigned char)p[i];
+					if (c == '.') {
+						break;
+					}
+					if (!isdigit(c)) {
+						radix = 8;
+					}
+					i++;
+				}
+			}
+		}
+	}
+};
+
+template <typename T> static inline T parse_number(char const *ptr, std::function<T(char const *p, int radix)> conv)
+{
+	NumberParser t(ptr);
+	T v = conv(t.p, t.radix);
+	if (t.sign) v = -v;
+	return v;
+}
+template <typename T> static inline T num(char const *value);
+template <> static inline char num<char>(char const *value)
+{
+	return parse_number<char>(value, [](char const *p, int radix){
+		return (char)strtol(p, nullptr, radix);
+	});
+}
+template <> static inline int32_t num<int32_t>(char const *value)
+{
+	return parse_number<int32_t>(value, [](char const *p, int radix){
+		return strtol(p, nullptr, radix);
+	});
+}
+template <> static inline uint32_t num<uint32_t>(char const *value)
+{
+	return parse_number<uint32_t>(value, [](char const *p, int radix){
+		return strtoul(p, nullptr, radix);
+	});
+}
+template <> static inline int64_t num<int64_t>(char const *value)
+{
+	return parse_number<int64_t>(value, [](char const *p, int radix){
+		return strtoll(p, nullptr, radix);
+	});
+}
+template <> static inline uint64_t num<uint64_t>(char const *value)
+{
+	return parse_number<uint64_t>(value, [](char const *p, int radix){
+		return strtoull(p, nullptr, radix);
+	});
+}
+template <> static inline double num<double>(char const *value)
+{
+	return parse_number<double>(value, [](char const *p, int radix){
+		if (radix == 10) {
+			return strtod(p, nullptr);
+		} else {
+			return (double)strtoll(p, nullptr, radix);
+		}
+	});
+}
+template <typename T> static inline T num(std::string const &value)
+{
+	return num<T>(value.c_str());
+}
+
+class string_formatter {
 private:
-	// internal data structure
 	struct Part {
 		Part *next;
 		int size;
@@ -386,97 +477,6 @@ private:
 		return alloc_part(ptr, end);
 	}
 
-	// number parser
-	struct NumberTraits {
-		char const *p;
-		bool sign = false;
-		int radix = 10;
-		NumberTraits(char const *ptr)
-			: p(ptr)
-		{
-			while (isspace((unsigned char)*p)) {
-				p++;
-			}
-			if (*p == '+') {
-				p++;
-			} else if (*p == '-') {
-				sign = true;
-				p++;
-			}
-			if (p[0] == '0') {
-				if (p[1] == 'x') {
-					p += 2;
-					radix = 16;
-				} else {
-					int i = 1;
-					while (1) {
-						int c = (unsigned char)p[i];
-						if (c == '.') {
-							break;
-						}
-						if (!isdigit(c)) {
-							radix = 8;
-						}
-						i++;
-					}
-				}
-			}
-		}
-	};
-
-	template <typename T> static T parse_number(char const *ptr, std::function<T(char const *p, int radix)> conv)
-	{
-		NumberTraits t(ptr);
-		T v = conv(t.p, t.radix);
-		if (t.sign) v = -v;
-		return v;
-	}
-	template <typename T> static T num(char const *value);
-	template <> static char num<char>(char const *value)
-	{
-		return parse_number<char>(value, [](char const *p, int radix){
-			return (char)strtol(p, nullptr, radix);
-		});
-	}
-	template <> static int32_t num<int32_t>(char const *value)
-	{
-		return parse_number<int32_t>(value, [](char const *p, int radix){
-			return strtol(p, nullptr, radix);
-		});
-	}
-	template <> static uint32_t num<uint32_t>(char const *value)
-	{
-		return parse_number<uint32_t>(value, [](char const *p, int radix){
-			return strtoul(p, nullptr, radix);
-		});
-	}
-	template <> static int64_t num<int64_t>(char const *value)
-	{
-		return parse_number<int64_t>(value, [](char const *p, int radix){
-			return strtoll(p, nullptr, radix);
-		});
-	}
-	template <> static uint64_t num<uint64_t>(char const *value)
-	{
-		return parse_number<uint64_t>(value, [](char const *p, int radix){
-			return strtoull(p, nullptr, radix);
-		});
-	}
-	template <> static double num<double>(char const *value)
-	{
-		return parse_number<double>(value, [](char const *p, int radix){
-			if (radix == 10) {
-				return strtod(p, nullptr);
-			} else {
-				return (double)strtoll(p, nullptr, radix);
-			}
-		});
-	}
-	template <typename T> static T num(std::string const &value)
-	{
-		return num<T>(value.c_str());
-	}
-
 	//
 	static char const *digits_lower()
 	{
@@ -702,7 +702,7 @@ private:
 	{
 		return format_pointer(val);
 	}
-	void format(std::function<Part *(int)> callback, int width, int precision)
+	void format(std::function<Part *(int)> const &callback, int width, int precision)
 	{
 		if (advance(false)) {
 			if (*next_ == '%') {
@@ -803,19 +803,24 @@ private:
 			head_ = next_;
 		}
 	}
-
 public:
-	strformat(std::string const &text)
+	string_formatter() = delete;
+	string_formatter(string_formatter &&) = delete;
+	string_formatter(string_formatter const &) = delete;
+	void operator = (string_formatter &&) = delete;
+	void operator = (string_formatter const &) = delete;
+
+	string_formatter(std::string const &text)
 		: text_(text)
 	{
 		reset();
 	}
-	~strformat()
+	~string_formatter()
 	{
 		clear();
 	}
 
-	strformat &reset()
+	string_formatter &reset()
 	{
 		clear();
 		head_ = text_.c_str();
@@ -828,81 +833,81 @@ public:
 		reset();
 	}
 
-	strformat &append(std::string const &s)
+	string_formatter &append(std::string const &s)
 	{
 		text_ += s;
 		return *this;
 	}
-	strformat &append(char const *s)
+	string_formatter &append(char const *s)
 	{
 		text_ += s;
 		return *this;
 	}
 
-	template <typename T> strformat &a(T const &value, int width = -1, int precision = -1)
+	template <typename T> string_formatter &a(T const &value, int width = -1, int precision = -1)
 	{
 		format([&](int hint){ return format(value, hint); }, width, precision);
 		return *this;
 	}
-	strformat &f(double value, int width = -1, int precision = -1)
+	string_formatter &f(double value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &c(char value, int width = -1, int precision = -1)
+	string_formatter &c(char value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &d(int32_t value, int width = -1, int precision = -1)
+	string_formatter &d(int32_t value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &ld(int64_t value, int width = -1, int precision = -1)
+	string_formatter &ld(int64_t value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &u(uint32_t value, int width = -1, int precision = -1)
+	string_formatter &u(uint32_t value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &lu(uint64_t value, int width = -1, int precision = -1)
+	string_formatter &lu(uint64_t value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &o(int32_t value, int width = -1, int precision = -1)
+	string_formatter &o(int32_t value, int width = -1, int precision = -1)
 	{
 		format([&](int hint){ return format_o32(value, hint); }, width, precision);
 		return *this;
 	}
-	strformat &lo(int64_t value, int width = -1, int precision = -1)
+	string_formatter &lo(int64_t value, int width = -1, int precision = -1)
 	{
 		format([&](int hint){ return format_o64(value, hint); }, width, precision);
 		return *this;
 	}
-	strformat &x(int32_t value, int width = -1, int precision = -1)
+	string_formatter &x(int32_t value, int width = -1, int precision = -1)
 	{
 		format([&](int hint){ return format_x32(value, hint); }, width, precision);
 		return *this;
 	}
-	strformat &lx(int64_t value, int width = -1, int precision = -1)
+	string_formatter &lx(int64_t value, int width = -1, int precision = -1)
 	{
 		format([&](int hint){ return format_x64(value, hint); }, width, precision);
 		return *this;
 	}
-	strformat &s(char const *value, int width = -1, int precision = -1)
+	string_formatter &s(char const *value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &s(std::string const &value, int width = -1, int precision = -1)
+	string_formatter &s(std::string const &value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
-	strformat &p(void *value, int width = -1, int precision = -1)
+	string_formatter &p(void *value, int width = -1, int precision = -1)
 	{
 		format([&](int hint){ (void)hint; return format_p(value); }, width, precision);
 		return *this;
 	}
 
-	template <typename T> strformat &operator () (T const &value, int width = -1, int precision = -1)
+	template <typename T> string_formatter &operator () (T const &value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
@@ -957,5 +962,9 @@ public:
 		return v.empty() ? std::string() : std::string(&v[0], v.size());
 	}
 };
+
+} // namespace strformat
+
+using strformat = strformat_ns::string_formatter;
 
 #endif // STRFORMAT_H
