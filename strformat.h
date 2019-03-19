@@ -68,37 +68,37 @@ template <typename T> static inline T parse_number(char const *ptr, std::functio
 	return v;
 }
 template <typename T> static inline T num(char const *value);
-template <> static inline char num<char>(char const *value)
+template <> inline char num<char>(char const *value)
 {
 	return parse_number<char>(value, [](char const *p, int radix){
 		return (char)strtol(p, nullptr, radix);
 	});
 }
-template <> static inline int32_t num<int32_t>(char const *value)
+template <> inline int32_t num<int32_t>(char const *value)
 {
 	return parse_number<int32_t>(value, [](char const *p, int radix){
 		return strtol(p, nullptr, radix);
 	});
 }
-template <> static inline uint32_t num<uint32_t>(char const *value)
+template <> inline uint32_t num<uint32_t>(char const *value)
 {
 	return parse_number<uint32_t>(value, [](char const *p, int radix){
 		return strtoul(p, nullptr, radix);
 	});
 }
-template <> static inline int64_t num<int64_t>(char const *value)
+template <> inline int64_t num<int64_t>(char const *value)
 {
 	return parse_number<int64_t>(value, [](char const *p, int radix){
 		return strtoll(p, nullptr, radix);
 	});
 }
-template <> static inline uint64_t num<uint64_t>(char const *value)
+template <> inline uint64_t num<uint64_t>(char const *value)
 {
 	return parse_number<uint64_t>(value, [](char const *p, int radix){
 		return strtoull(p, nullptr, radix);
 	});
 }
-template <> static inline double num<double>(char const *value)
+template <> inline double num<double>(char const *value)
 {
 	return parse_number<double>(value, [](char const *p, int radix){
 		if (radix == 10) {
@@ -803,6 +803,15 @@ private:
 			head_ = next_;
 		}
 	}
+	int length()
+	{
+		advance(true);
+		int len = 0;
+		for (Part *p = list_.head; p; p = p->next) {
+			len += p->size;
+		}
+		return len;
+	}
 public:
 	string_formatter() = delete;
 	string_formatter(string_formatter &&) = delete;
@@ -911,16 +920,6 @@ public:
 	{
 		return a(value, width, precision);
 	}
-private:
-	int length()
-	{
-		int len = 0;
-		for (Part *p = list_.head; p; p = p->next) {
-			len += p->size;
-		}
-		return len;
-	}
-public:
 	void render(std::function<void (char const *ptr, int len)> const &to)
 	{
 		advance(true);
@@ -957,13 +956,22 @@ public:
 	}
 	std::string str()
 	{
-		std::vector<char> v;
-		vec(&v);
-		return v.empty() ? std::string() : std::string(&v[0], v.size());
+		int n = length();
+		char *p = (char *)alloca(n);
+		char *d = p;
+		render([&](char const *ptr, int len){
+			memcpy(d, ptr, len);
+			d += len;
+		});
+		return std::string(p, n);
+	}
+	operator std::string ()
+	{
+		return str();
 	}
 };
 
-} // namespace strformat
+} // namespace strformat_ns
 
 using strformat = strformat_ns::string_formatter;
 
