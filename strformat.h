@@ -184,6 +184,58 @@ private:
 		p->data[n] = 0;
 		add_part(list, p);
 	}
+	//
+	static char const *digits_lower()
+	{
+		return "0123456789abcdef";
+	}
+	static char const *digits_upper()
+	{
+		return "0123456789ABCDEF";
+	}
+	static double pow10_(int n)
+	{
+		if (n < 0) {
+			return 1 / pow10_(-n);
+		}
+		if (n < 30) {
+			static const double table[] = {
+				1.0,
+				10.0,
+				100.0,
+				1000.0,
+				10000.0,
+				100000.0,
+				1000000.0,
+				10000000.0,
+				100000000.0,
+				1000000000.0,
+				10000000000.0,
+				100000000000.0,
+				1000000000000.0,
+				10000000000000.0,
+				100000000000000.0,
+				1000000000000000.0,
+				10000000000000000.0,
+				100000000000000000.0,
+				1000000000000000000.0,
+				10000000000000000000.0,
+				100000000000000000000.0,
+				1000000000000000000000.0,
+				10000000000000000000000.0,
+				100000000000000000000000.0,
+				1000000000000000000000000.0,
+				10000000000000000000000000.0,
+				100000000000000000000000000.0,
+				1000000000000000000000000000.0,
+				10000000000000000000000000000.0,
+				100000000000000000000000000000.0,
+			};
+			return table[n];
+		}
+		return pow(10.0, n);
+	}
+	//
 	static Part *format_double(double val, int precision, bool trim_unnecessary_zeros, bool force_sign)
 	{
 		if (std::isnan(val)) return alloc_part("#NAN");
@@ -194,22 +246,17 @@ private:
 
 		if (precision < 0) precision = 0;
 
-		int pt = (val == 0) ? 0 : (int)floor(log10(val));
-		pt++;
-		val *= pow(10.0, -pt);
-		int length = precision;
-		if (pt < 0) {
-			if (precision > 0 && precision <= -pt) {
-				pt = -precision;
-				length = 0;
-			}
-		} else {
-			length += pt;
-		}
-		int significant = std::min(length, 17);
-		double adjust = pow(10.0, -significant) * 5;
+		int pt = (val == 0 ? 0 : (int)floor(log10(val))) + 1;
+		val *= pow10_(-pt);
 
-		char *ptr = (char *)alloca(length + 4 + (pt < 0 ? -pt : 0)) + 3;
+		int len1 = precision + std::min(pt, 0);
+		int len2 = precision + pt;
+
+		int significant = std::min(len2, 17);
+		double adjust = pow10_(-significant) * 5;
+
+		int len3 = std::max(pt, 0) + precision + 4;
+		char *ptr = (char *)alloca(len3) + 3;
 		char *end = ptr;
 		char *dot = nullptr;
 
@@ -223,13 +270,13 @@ private:
 				for (int i = 0; i < n; i++) {
 					*end++ = '0';
 				}
-				if (length > n) {
-					length -= n;
+				if (len1 > n) {
+					len1 -= n;
 				}
 			}
 		}
 
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < len2; i++) {
 			if (i == pt) {
 				dot = end;
 				*end++ = '.';
@@ -273,7 +320,6 @@ private:
 				end--;
 			}
 		}
-
 		return alloc_part(ptr, end);
 	}
 	static Part *format_int32(int32_t val, bool force_sign)
@@ -383,7 +429,7 @@ private:
 		char *ptr = end;
 		*end = 0;
 
-		char const *digits = upper ? digits_upper() : digits_lower();
+		char const *digits = digits_lower();
 
 		if (val == 0) {
 			*--ptr = '0';
@@ -404,7 +450,7 @@ private:
 		char *ptr = end;
 		*end = 0;
 
-		char const *digits = upper ? digits_upper() : digits_lower();
+		char const *digits = digits_lower();
 
 		if (val == 0) {
 			*--ptr = '0';
@@ -467,24 +513,16 @@ private:
 		char *ptr = end;
 		*end = 0;
 
+		char const *digits = digits_upper();
+
 		uintptr_t v = (uintptr_t)val;
 		for (int i = 0; i < (int)sizeof(uintptr_t) * 2; i++) {
-			char c = digits_upper()[v & 15];
+			char c = digits[v & 15];
 			v >>= 4;
 			*--ptr = c;
 		}
 
 		return alloc_part(ptr, end);
-	}
-
-	//
-	static char const *digits_lower()
-	{
-		return "0123456789abcdef";
-	}
-	static char const *digits_upper()
-	{
-		return "0123456789ABCDEF";
 	}
 private:
 	std::string text_;
@@ -835,11 +873,6 @@ public:
 		head_ = text_.c_str();
 		next_ = head_;
 		return *this;
-	}
-	void destroy()
-	{
-		text_.clear();
-		reset();
 	}
 
 	string_formatter &append(std::string const &s)

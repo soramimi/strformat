@@ -2,12 +2,12 @@
 #include "strformat.h"
 #include <cmath>
 
-void test_(char const *text, std::string const &result, char const *answer1, char const *answer2, bool show);
+void test_(char const *text, std::string const &result, char const *answer1, char const *answer2);
 
-#define TEST1(Q, A1)     test_(#Q, (Q).str(), A1, nullptr, show)
-#define TEST2(Q, A1, A2) test_(#Q, (Q).str(), A1, A2     , show)
+#define TEST1(Q, A1)         test_(#Q, (Q).str(), A1, nullptr)
+#define TEST2(Q, A1, A2)     test_(#Q, (Q).str(), A1, A2     )
 
-void test(bool show)
+void test()
 {
 	// operator ()
 
@@ -91,7 +91,7 @@ void test(bool show)
 		 , "12345678901234567000.0000000000", "12345678901234566000.0000000000");
 
 	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 15)
-		 , "0.000000012345678");
+		 , "0.000000012345679");
 	TEST1(strformat("%.*f").f(123.0, -1, 15)
 		 , "123.000000000000000");
 	TEST2(strformat("%.*f").f(123.4567890123456789, -1, 15)
@@ -108,6 +108,7 @@ void test(bool show)
 	TEST2(strformat("%.*f").f(12345678901234567890.0, -1, 30)
 		 , "12345678901234567000.000000000000000000000000000000", "12345678901234566000.000000000000000000000000000000");
 
+
 	TEST1(strformat("(%f)").f(123.456)
 		 , "(123.456000)");
 	TEST1(strformat("(%0f)").f(123.456)
@@ -116,6 +117,10 @@ void test(bool show)
 		 , "(123.456000)");
 	TEST1(strformat("(%+0f)").f(123.456)
 		 , "(+123.456000)");
+	TEST1(strformat("(%f)").f(1.23456789)
+		 , "(1.234568)");
+	TEST1(strformat("(%+f)").f(1.23456789)
+		 , "(+1.234568)");
 
 	TEST1(strformat("(%15.4f)").f(123.456)
 		 , "(       123.4560)");
@@ -201,7 +206,7 @@ void test(bool show)
 		 , "-12345678901234567000.0000000000", "-12345678901234566000.0000000000");
 
 	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 15)
-		 , "-0.000000012345678");
+		 , "-0.000000012345679");
 	TEST1(strformat("%.*f").f(-123.0, -1, 15)
 		 , "-123.000000000000000");
 	TEST2(strformat("%.*f").f(-123.4567890123456789, -1, 15)
@@ -226,6 +231,10 @@ void test(bool show)
 		 , "(-123.456000)");
 	TEST1(strformat("(%+0f)").f(-123.456)
 		 , "(-123.456000)");
+	TEST1(strformat("(%f)").f(-1.23456789)
+		 , "(-1.234568)");
+	TEST1(strformat("(%+f)").f(-1.23456789)
+		 , "(-1.234568)");
 
 	TEST1(strformat("(%15.4f)").f(-123.456)
 		 , "(      -123.4560)");
@@ -307,6 +316,15 @@ void test(bool show)
 		 , "(493.000000)");
 	TEST1(strformat("(%f)").s(nullptr)
 		 , "((null))");
+
+	TEST1(strformat("(%f)").s("1.23456789e2")
+		  , "(123.456789)");
+	TEST1(strformat("(%f)").s("1.23456789e+2")
+		  , "(123.456789)");
+	TEST1(strformat("(%f)").s("1.23456789e-2")
+		  , "(0.012346)");
+	TEST1(strformat("(%f)").s("0.0123456789")
+		  , "(0.012346)");
 
 	// f (NAN/INF)
 

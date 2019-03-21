@@ -5,22 +5,22 @@
 #include <windows.h>
 #endif
 
-void test(bool show);
+void test();
 
 int passed = 0;
 int failed = 0;
 int total = 0;
 
-void test_(char const *text, std::string const &result, const char *answer1, const char *answer2, bool show)
+void test_(char const *text, std::string const &result, const char *answer1, const char *answer2)
 {
 	total++;
-	if (show) strformat("#%5d %s\n").d(total).s(text).out();
 
-	if (result == answer1 || (answer2 && result == answer2)) {
-		if (show) strformat("[pass] %s\n").s(answer1).out();
+	if (result == answer1) {
+		passed++;
+	} else if (answer2 && result == answer2) {
 		passed++;
 	} else {
-		if (show) strformat("[fail] expected '%s'\n , but returned '%s'\n").s(answer1).s(result).out();
+		strformat("[fail] %s expected '%s'\n , but returned '%s'\n").s(text).s(answer1).s(result).err();
 		failed++;
 	}
 }
@@ -33,25 +33,11 @@ void print_result()
 int main()
 {
 #if 1
-	test(true);
+	test();
 	print_result();
-#elif 0
-
-#ifdef _WIN32
-	DWORD ms = GetTickCount();
-	for (int i = 0; i < 100000; i++) {
-		test(false);
-	}
-	ms = GetTickCount() - ms;
-	print_result();
-	strformat("\n%ums\n").u(ms).err();
-#endif
-
 #else
-	char const *fmt = "(%0*.*f)\n";
-	double val = 123.456789;
-	printf(fmt, 10, 2, val);
-	strformat(fmt)(val, 10, 2).out();
+	fprintf(stderr, "%.30f\n", 0.000000012345678901234567890123456789);
+	strformat("%.30f\n").f(0.000000012345678901234567890123456789).err();
 #endif
 	return 0;
 }
