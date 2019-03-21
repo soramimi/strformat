@@ -422,7 +422,7 @@ private:
 
 		return alloc_part(ptr, end);
 	}
-	static Part *format_oct32(uint32_t val, bool upper)
+	static Part *format_oct32(uint32_t val)
 	{
 		int n = 30;
 		char *end = (char *)alloca(n) + n - 1;
@@ -443,7 +443,7 @@ private:
 
 		return alloc_part(ptr, end);
 	}
-	static Part *format_oct64(uint64_t val, bool upper)
+	static Part *format_oct64(uint64_t val)
 	{
 		int n = 30;
 		char *end = (char *)alloca(n) + n - 1;
@@ -591,7 +591,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_oct32(value, upper_);
+		return format_oct32(value);
 	}
 	Part *format_o64(uint64_t value, int hint)
 	{
@@ -604,7 +604,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_oct64(value, upper_);
+		return format_oct64(value);
 	}
 	Part *format_x32(uint32_t value, int hint)
 	{
@@ -695,7 +695,7 @@ private:
 			switch (hint) {
 			case 'c': return format_c((char)value);
 			case 'd': return format((int64_t)value, 0);
-			case 'o': return format_oct64(value, false);
+			case 'o': return format_oct64(value);
 			case 'x': return format_hex64(value, false);
 			case 'f': return format((double)value, 0);
 			}
