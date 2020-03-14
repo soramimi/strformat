@@ -14,6 +14,84 @@ void test()
 	TEST1(strformat("(%0*.*f)")(123.456789, 10, 2)
 		 , "(0000123.46)");
 
+	// d
+
+	TEST1(strformat("%d").d(0)
+		 , "0");
+	TEST1(strformat("%d").d(123)
+		 , "123");
+	TEST1(strformat("%d").d(-123)
+		 , "-123");
+	TEST1(strformat("%d").d(0x7fffffff)
+		 , "2147483647");
+	TEST1(strformat("%d").d(0x80000000)
+		 , "-2147483648");
+	TEST1(strformat("%d").d(0xffffffff)
+		 , "-1");
+	TEST1(strformat("%12d").d(0)
+		 , "           0");
+	TEST1(strformat("%12d").d(123)
+		 , "         123");
+	TEST1(strformat("%12d").d(-123)
+		 , "        -123");
+	TEST1(strformat("%12d").d(0x7fffffff)
+		 , "  2147483647");
+	TEST1(strformat("%12d").d(0x80000000)
+		 , " -2147483648");
+	TEST1(strformat("%12d").d(0xffffffff)
+		 , "          -1");
+	TEST1(strformat("%012d").d(0)
+		 , "000000000000");
+	TEST1(strformat("%012d").d(123)
+		 , "000000000123");
+	TEST1(strformat("%012d").d(-123)
+		 , "-00000000123");
+	TEST1(strformat("%012d").d(0x7fffffff)
+		 , "002147483647");
+	TEST1(strformat("%012d").d(0x80000000)
+		 , "-02147483648");
+	TEST1(strformat("%012d").d(0xffffffff)
+		 , "-00000000001");
+
+	// u
+
+	TEST1(strformat("%u").u(0)
+		 , "0");
+	TEST1(strformat("%u").u(123)
+		 , "123");
+	TEST1(strformat("%u").u(-123)
+		 , "4294967173");
+	TEST1(strformat("%u").u(0x7fffffff)
+		 , "2147483647");
+	TEST1(strformat("%u").u(0x80000000)
+		 , "2147483648");
+	TEST1(strformat("%u").u(0xffffffff)
+		 , "4294967295");
+	TEST1(strformat("%12u").u(0)
+		 , "           0");
+	TEST1(strformat("%12u").u(123)
+		 , "         123");
+	TEST1(strformat("%12u").u(-123)
+		 , "  4294967173");
+	TEST1(strformat("%12u").u(0x7fffffff)
+		 , "  2147483647");
+	TEST1(strformat("%12u").u(0x80000000)
+		 , "  2147483648");
+	TEST1(strformat("%12u").u(0xffffffff)
+		 , "  4294967295");
+	TEST1(strformat("%012u").u(0)
+		 , "000000000000");
+	TEST1(strformat("%012u").u(123)
+		 , "000000000123");
+	TEST1(strformat("%012u").u(-123)
+		 , "004294967173");
+	TEST1(strformat("%012u").u(0x7fffffff)
+		 , "002147483647");
+	TEST1(strformat("%012u").u(0x80000000)
+		 , "002147483648");
+	TEST1(strformat("%012u").u(0xffffffff)
+		 , "004294967295");
+
 	// f (zero)
 
 	TEST1(strformat("%.*f").f(0, -1, 0)

@@ -332,16 +332,16 @@ private:
 		if (val == 0) {
 			*--ptr = '0';
 		} else {
-			if (val == (int32_t)1 << 31) {
-				*--ptr = '8';
-				val /= 10;
-			}
 			bool sign = (val < 0);
-			if (sign) val = -val;
-
-			while (val != 0) {
-				int c = val % 10 + '0';
-				val /= 10;
+			uint32_t v;
+			if (sign) {
+				v = (uint32_t)-val;
+			} else {
+				v = (uint32_t)val;;
+			}
+			while (v != 0) {
+				int c = v % 10 + '0';
+				v /= 10;
 				*--ptr = c;
 			}
 			if (sign) {
