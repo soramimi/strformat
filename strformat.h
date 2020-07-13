@@ -193,121 +193,99 @@ private:
 	{
 		return "0123456789ABCDEF";
 	}
-	static double pow10_(int n)
-	{
-		if (n < 0) {
-			return 1 / pow10_(-n);
-		}
-		if (n < 30) {
-			static const double table[] = {
-				1.0,
-				10.0,
-				100.0,
-				1000.0,
-				10000.0,
-				100000.0,
-				1000000.0,
-				10000000.0,
-				100000000.0,
-				1000000000.0,
-				10000000000.0,
-				100000000000.0,
-				1000000000000.0,
-				10000000000000.0,
-				100000000000000.0,
-				1000000000000000.0,
-				10000000000000000.0,
-				100000000000000000.0,
-				1000000000000000000.0,
-				10000000000000000000.0,
-				100000000000000000000.0,
-				1000000000000000000000.0,
-				10000000000000000000000.0,
-				100000000000000000000000.0,
-				1000000000000000000000000.0,
-				10000000000000000000000000.0,
-				100000000000000000000000000.0,
-				1000000000000000000000000000.0,
-				10000000000000000000000000000.0,
-				100000000000000000000000000000.0,
-			};
-			return table[n];
-		}
-		return pow(10.0, n);
-	}
 	//
-	static Part *format_double(double val, int precision, bool trim_unnecessary_zeros, bool force_sign)
+	static Part *format_double(double val, int precision, bool trim_zeros, bool plus)
 	{
 		if (std::isnan(val)) return alloc_part("#NAN");
 		if (std::isinf(val)) return alloc_part("#INF");
 
-		bool sign = val < 0;
-		if (sign) val = -val;
+		char *ptr, *end;
 
-		if (precision < 0) precision = 0;
-
-		int pt = (val == 0 ? 0 : (int)floor(log10(val))) + 1;
-		val *= pow10_(-pt);
-
-		int len1 = precision + std::min(pt, 0);
-		int len2 = precision + pt;
-
-		int significant = std::min(len2, 17);
-		double adjust = pow10_(-significant) * 5;
-
-		int len3 = std::max(pt, 0) + precision + 4;
-		char *ptr = (char *)alloca(len3) + 3;
-		char *end = ptr;
 		char *dot = nullptr;
 
-		if (pt < 0) {
-			int n = -pt;
-			if (n > precision) {
-				n = precision;
+		bool sign = val < 0;
+		if (sign) {
+			val = -val;
+		}
+
+		int n = 0;
+		double v;
+
+		v = floor(val);
+		val -= v;
+		if (v == 0) {
+			ptr = end = (char *)alloca(precision + 10) + 5;
+		} else {
+			double t = v;
+			do {
+				t = floor(t / 10);
+				n++;
+			} while (t != 0);
+			ptr = end = (char *)alloca(n + precision + 10) + n + 5;
+		}
+		if (v == 0) {
+			*--ptr = '0';
+		} else {
+			double t = v;
+			for (int i = 0; i < n; i++) {
+				t /= 10;
+				double u = floor(t);
+				*--ptr = (char)((t - u) * 10 + 0.49) + '0';
+				t = u;
 			}
-			if (n > 0) {
-				*end++ = '.';
-				for (int i = 0; i < n; i++) {
+		}
+
+		if (precision > 0) {
+			dot = end;
+			*end++ = '.';
+			v = val;
+			int e = 0;
+			while (v > 0 && v < 1) {
+				v *= 10;
+				e++;
+			}
+			while (v >= 1) {
+				v /= 10;
+				e--;
+			}
+			double add = 0;
+			{
+				add = 0.5;
+				for (int i = 0; i < precision - e; i++) {
+					add /= 10;
+				}
+			}
+			v += add;
+			int i = 0;
+			int r = std::min(e, precision);
+			while (i < r) {
+				*end++ = '0';
+				if (n != 0) {
+					n++;
+				}
+				i++;
+			}
+			while (i < precision) {
+				if (n < 16) {
+					v *= 10;
+					double m = floor(v);
+					v -= m;
+					*end++ = (char)m + '0';
+				} else {
 					*end++ = '0';
 				}
-				if (len1 > n) {
-					len1 -= n;
-				}
-			}
-		}
-
-		for (int i = 0; i < len2; i++) {
-			if (i == pt) {
-				dot = end;
-				*end++ = '.';
-			}
-			if (i < significant) {
-				val *= 10;
-				double v = floor(val);
-				val -= v;
-				val += adjust;
-				adjust = 0;
-				*end++ = (int)v + '0';
-			} else {
-				*end++ = '0';
-			}
-		}
-
-		if (ptr == end) {
-			*end++ = '0';
-		} else {
-			if (*ptr == '.') {
-				*--ptr = '0';
+				n++;
+				i++;
 			}
 		}
 
 		if (sign) {
 			*--ptr = '-';
-		} else if (force_sign) {
+		} else if (plus) {
 			*--ptr = '+';
 		}
 
-		if (trim_unnecessary_zeros && dot) {
+		if (trim_zeros && dot) {
 			while (dot < end) {
 				char c = end[-1];
 				if (c == '.') {
@@ -320,6 +298,7 @@ private:
 				end--;
 			}
 		}
+
 		return alloc_part(ptr, end);
 	}
 	static Part *format_int32(int32_t val, bool force_sign)
@@ -532,7 +511,7 @@ private:
 	bool upper_ : 1;
 	bool zero_padding_ : 1;
 	bool align_left_ : 1;
-	bool force_sign_ : 1;
+	bool plus_ : 1;
 	int width_;
 	int precision_;
 	int lflag_;
@@ -571,10 +550,10 @@ private:
 		Flush();
 		return r;
 	}
-	Part *format_f(double value, bool trim_unnecessary_zeros)
+	Part *format_f(double value, bool trim_zeros)
 	{
 		int pr = precision_ < 0 ? 6 : precision_;
-		return format_double(value, pr, trim_unnecessary_zeros, force_sign_);
+		return format_double(value, pr, trim_zeros, plus_);
 	}
 	Part *format_c(char c)
 	{
@@ -661,7 +640,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_int32(value, force_sign_);
+		return format_int32(value, plus_);
 	}
 	Part *format(uint32_t value, int hint)
 	{
@@ -687,7 +666,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_int64(value, force_sign_);
+		return format_int64(value, plus_);
 	}
 	Part *format(uint64_t value, int hint)
 	{
@@ -750,7 +729,7 @@ private:
 			upper_ = false;
 			zero_padding_ = false;
 			align_left_ = false;
-			force_sign_ = false;
+			plus_ = false;
 			width_ = -1;
 			precision_ = -1;
 			lflag_ = 0;
@@ -760,7 +739,7 @@ private:
 				if (c == '0') {
 					zero_padding_ = true;
 				} else if (c == '+') {
-					force_sign_ = true;
+					plus_ = true;
 				} else if (c == '-') {
 					align_left_ = true;
 				} else {
