@@ -1,5 +1,5 @@
 // String Formatter
-// Copyright (C) 2019 S.Fuchita (soramimi_jp)
+// Copyright (C) 2020 S.Fuchita (soramimi_jp)
 // This software is distributed under the MIT license.
 
 #ifndef STRFORMAT_H
@@ -40,19 +40,18 @@ struct NumberParser {
 			p++;
 		}
 		if (p[0] == '0') {
-			if (p[1] == 'x') {
+			if (p[1] == 'x' || p[1] == 'X') {
 				p += 2;
 				radix = 16;
 			} else {
 				int i = 1;
 				while (1) {
 					int c = (unsigned char)p[i];
-					if (c == '.') {
-						break;
-					}
+					if (c == '.') break;
 					if (!isdigit(c)) {
 						radix = 8;
 					}
+					if (c == 0) break;
 					i++;
 				}
 			}
@@ -208,37 +207,25 @@ private:
 			val = -val;
 		}
 
-		int n = 0;
-		double v;
+		double intval = floor(val);
+		val -= intval;
 
-		v = floor(val);
-		val -= v;
-		if (v == 0) {
+		int intlen = 0;
+		if (intval == 0) {
 			ptr = end = (char *)alloca(precision + 10) + 5;
 		} else {
-			double t = v;
+			double t = intval;
 			do {
 				t = floor(t / 10);
-				n++;
+				intlen++;
 			} while (t != 0);
-			ptr = end = (char *)alloca(n + precision + 10) + n + 5;
-		}
-		if (v == 0) {
-			*--ptr = '0';
-		} else {
-			double t = v;
-			for (int i = 0; i < n; i++) {
-				t /= 10;
-				double u = floor(t);
-				*--ptr = (char)((t - u) * 10 + 0.49) + '0';
-				t = u;
-			}
+			ptr = end = (char *)alloca(intlen + precision + 10) + intlen + 5;
 		}
 
 		if (precision > 0) {
 			dot = end;
 			*end++ = '.';
-			v = val;
+			double v = val;
 			int e = 0;
 			while (v > 0 && v < 1) {
 				v *= 10;
@@ -248,15 +235,16 @@ private:
 				v /= 10;
 				e--;
 			}
-			double add = 0;
-			{
-				add = 0.5;
-				for (int i = 0; i < precision - e; i++) {
-					add /= 10;
-				}
+			double add = 0.5;
+			for (int i = 0; i < precision - e; i++) {
+				add /= 10;
 			}
 			v += add;
+			double t = floor(v);
+			intval += t;
+			v -= t;
 			int i = 0;
+			int n = intlen;
 			int r = std::min(e, precision);
 			while (i < r) {
 				*end++ = '0';
@@ -276,6 +264,27 @@ private:
 				}
 				n++;
 				i++;
+			}
+		} else {
+			intval += floor(val + 0.5);
+		}
+
+		intlen = 0;
+		double t = intval;
+		do {
+			t = floor(t / 10);
+			intlen++;
+		} while (t != 0);
+
+		if (intval == 0) {
+			*--ptr = '0';
+		} else {
+			double t = intval;
+			for (int i = 0; i < intlen; i++) {
+				t /= 10;
+				double u = floor(t);
+				*--ptr = (char)((t - u) * 10 + 0.49) + '0';
+				t = u;
 			}
 		}
 

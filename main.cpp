@@ -32,7 +32,8 @@ void print_result()
 
 int main()
 {
-	double val = 12345678901234567890.0;
+//	printf("%.0f\n", 0.9);
+//	double val = 12345678901234567890.0;
 //	double val = 98765432109876543210.0;
 #if 1
 	test();
@@ -41,7 +42,7 @@ int main()
 	std::string s;
 //	s = strformat("%.10f\n").f(0.00012345678901234567890123456789).str();
 //	puts(s.c_str());
-	s = strformat("%.30f\n").f(123.4567890123456789).str();
+	s = strformat("%.1f\n").f(9.99).str();
 	puts(s.c_str());
 #endif
 	return 0;
