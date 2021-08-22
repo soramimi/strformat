@@ -829,9 +829,9 @@ private:
 			head_ = next_;
 		}
 	}
-	int length()
+	int length() const
 	{
-		advance(true);
+		const_cast<string_formatter *>(this)->advance(true);
 		int len = 0;
 		for (Part *p = list_.head; p; p = p->next) {
 			len += p->size;
@@ -941,9 +941,9 @@ public:
 	{
 		return a(value, width, precision);
 	}
-	void render(std::function<void (char const *ptr, int len)> const &to)
+	void render(std::function<void (char const *ptr, int len)> const &to) const
 	{
-		advance(true);
+		const_cast<string_formatter *>(this)->advance(true);
 		for (Part *p = list_.head; p; p = p->next) {
 			to(p->data, p->size);
 		}
@@ -975,7 +975,7 @@ public:
 	{
 		write_to(stderr);
 	}
-	std::string str()
+	std::string str() const
 	{
 		int n = length();
 		char *p = (char *)alloca(n);
