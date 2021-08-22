@@ -45,14 +45,10 @@ struct NumberParser {
 				radix = 16;
 			} else {
 				int i = 1;
-				while (1) {
+				while (p[i]) {
 					int c = (unsigned char)p[i];
-					if (c == '.') {
-						break;
-					}
-					if (!isdigit(c)) {
-						radix = 8;
-					}
+					if (c < '0' || c > '7') break;
+					radix = 8;
 					i++;
 				}
 			}
@@ -946,7 +942,7 @@ public:
 			::write(fd, ptr, len);
 		});
 	}
-	void out()
+	void put()
 	{
 		write_to(stdout);
 	}
