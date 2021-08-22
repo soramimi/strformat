@@ -1,5 +1,5 @@
 // String Formatter
-// Copyright (C) 2019 S.Fuchita (soramimi_jp)
+// Copyright (C) 2020 S.Fuchita (soramimi_jp)
 // This software is distributed under the MIT license.
 
 #ifndef STRFORMAT_H
@@ -40,7 +40,7 @@ struct NumberParser {
 			p++;
 		}
 		if (p[0] == '0') {
-			if (p[1] == 'x') {
+			if (p[1] == 'x' || p[1] == 'X') {
 				p += 2;
 				radix = 16;
 			} else {
@@ -180,83 +180,118 @@ private:
 		p->data[n] = 0;
 		add_part(list, p);
 	}
-	static Part *format_double(double val, int precision, bool trim_unnecessary_zeros, bool force_sign)
+	//
+	static char const *digits_lower()
+	{
+		return "0123456789abcdef";
+	}
+	static char const *digits_upper()
+	{
+		return "0123456789ABCDEF";
+	}
+	//
+	static Part *format_double(double val, int precision, bool trim_zeros, bool plus)
 	{
 		if (std::isnan(val)) return alloc_part("#NAN");
 		if (std::isinf(val)) return alloc_part("#INF");
 
-		bool sign = val < 0;
-		if (sign) val = -val;
+		char *ptr, *end;
 
-		if (precision < 0) precision = 0;
-
-		int pt = (val == 0) ? 0 : (int)floor(log10(val));
-		pt++;
-		val *= pow(10.0, -pt);
-		int length = precision;
-		if (pt < 0) {
-			if (precision > 0 && precision <= -pt) {
-				pt = -precision;
-				length = 0;
-			}
-		} else {
-			length += pt;
-		}
-		int significant = std::min(length, 17);
-		double adjust = pow(10.0, -significant) * 5;
-
-		char *ptr = (char *)alloca(length + 4 + (pt < 0 ? -pt : 0)) + 3;
-		char *end = ptr;
 		char *dot = nullptr;
 
-		if (pt < 0) {
-			int n = -pt;
-			if (n > precision) {
-				n = precision;
+		bool sign = val < 0;
+		if (sign) {
+			val = -val;
+		}
+
+		double intval = floor(val);
+		val -= intval;
+
+		int intlen = 0;
+		if (intval == 0) {
+			ptr = end = (char *)alloca(precision + 10) + 5;
+		} else {
+			double t = intval;
+			do {
+				t = floor(t / 10);
+				intlen++;
+			} while (t != 0);
+			ptr = end = (char *)alloca(intlen + precision + 10) + intlen + 5;
+		}
+
+		if (precision > 0) {
+			dot = end;
+			*end++ = '.';
+			double v = val;
+			int e = 0;
+			while (v > 0 && v < 1) {
+				v *= 10;
+				e++;
 			}
-			if (n > 0) {
-				*end++ = '.';
-				for (int i = 0; i < n; i++) {
+			while (v >= 1) {
+				v /= 10;
+				e--;
+			}
+			double add = 0.5;
+			for (int i = 0; i < precision - e; i++) {
+				add /= 10;
+			}
+			v += add;
+			double t = floor(v);
+			intval += t;
+			v -= t;
+			int i = 0;
+			int n = intlen;
+			int r = std::min(e, precision);
+			while (i < r) {
+				*end++ = '0';
+				if (n != 0) {
+					n++;
+				}
+				i++;
+			}
+			while (i < precision) {
+				if (n < 16) {
+					v *= 10;
+					double m = floor(v);
+					v -= m;
+					*end++ = (char)m + '0';
+				} else {
 					*end++ = '0';
 				}
-				if (length > n) {
-					length -= n;
-				}
+				n++;
+				i++;
 			}
-		}
-
-		for (int i = 0; i < length; i++) {
-			if (i == pt) {
-				dot = end;
-				*end++ = '.';
-			}
-			if (i < significant) {
-				val *= 10;
-				double v = floor(val);
-				val -= v;
-				val += adjust;
-				adjust = 0;
-				*end++ = (int)v + '0';
-			} else {
-				*end++ = '0';
-			}
-		}
-
-		if (ptr == end) {
-			*end++ = '0';
 		} else {
-			if (*ptr == '.') {
-				*--ptr = '0';
+			intval += floor(val + 0.5);
+		}
+
+		intlen = 0;
+		double t = intval;
+		do {
+			t = floor(t / 10);
+			intlen++;
+		} while (t != 0);
+
+		if (intval == 0) {
+			*--ptr = '0';
+		} else {
+			double t = intval;
+			for (int i = 0; i < intlen; i++) {
+				t /= 10;
+				double u = floor(t);
+				*--ptr = (char)((t - u) * 10 + 0.49) + '0';
+				t = u;
 			}
 		}
 
 		if (sign) {
 			*--ptr = '-';
-		} else if (force_sign) {
+		} else if (plus) {
 			*--ptr = '+';
 		}
 
-		if (trim_unnecessary_zeros && dot) {
+		if (trim_zeros && dot) {
 			while (dot < end) {
 				char c = end[-1];
 				if (c == '.') {
@@ -282,16 +317,16 @@ private:
 		if (val == 0) {
 			*--ptr = '0';
 		} else {
-			if (val == (int32_t)1 << 31) {
-				*--ptr = '8';
-				val /= 10;
-			}
 			bool sign = (val < 0);
-			if (sign) val = -val;
-
-			while (val != 0) {
-				int c = val % 10 + '0';
-				val /= 10;
+			uint32_t v;
+			if (sign) {
+				v = (uint32_t)-val;
+			} else {
+				v = (uint32_t)val;;
+			}
+			while (v != 0) {
+				int c = v % 10 + '0';
+				v /= 10;
 				*--ptr = c;
 			}
 			if (sign) {
@@ -372,14 +407,14 @@ private:
 
 		return alloc_part(ptr, end);
 	}
-	static Part *format_oct32(uint32_t val, bool upper)
+	static Part *format_oct32(uint32_t val)
 	{
 		int n = 30;
 		char *end = (char *)alloca(n) + n - 1;
 		char *ptr = end;
 		*end = 0;
 
-		char const *digits = upper ? digits_upper() : digits_lower();
+		char const *digits = digits_lower();
 
 		if (val == 0) {
 			*--ptr = '0';
@@ -393,14 +428,14 @@ private:
 
 		return alloc_part(ptr, end);
 	}
-	static Part *format_oct64(uint64_t val, bool upper)
+	static Part *format_oct64(uint64_t val)
 	{
 		int n = 30;
 		char *end = (char *)alloca(n) + n - 1;
 		char *ptr = end;
 		*end = 0;
 
-		char const *digits = upper ? digits_upper() : digits_lower();
+		char const *digits = digits_lower();
 
 		if (val == 0) {
 			*--ptr = '0';
@@ -463,24 +498,16 @@ private:
 		char *ptr = end;
 		*end = 0;
 
+		char const *digits = digits_upper();
+
 		uintptr_t v = (uintptr_t)val;
 		for (int i = 0; i < (int)sizeof(uintptr_t) * 2; i++) {
-			char c = digits_upper()[v & 15];
+			char c = digits[v & 15];
 			v >>= 4;
 			*--ptr = c;
 		}
 
 		return alloc_part(ptr, end);
-	}
-
-	//
-	static char const *digits_lower()
-	{
-		return "0123456789abcdef";
-	}
-	static char const *digits_upper()
-	{
-		return "0123456789ABCDEF";
 	}
 private:
 	std::string text_;
@@ -490,7 +517,7 @@ private:
 	bool upper_ : 1;
 	bool zero_padding_ : 1;
 	bool align_left_ : 1;
-	bool force_sign_ : 1;
+	bool plus_ : 1;
 	int width_;
 	int precision_;
 	int lflag_;
@@ -529,10 +556,10 @@ private:
 		Flush();
 		return r;
 	}
-	Part *format_f(double value, bool trim_unnecessary_zeros)
+	Part *format_f(double value, bool trim_zeros)
 	{
 		int pr = precision_ < 0 ? 6 : precision_;
-		return format_double(value, pr, trim_unnecessary_zeros, force_sign_);
+		return format_double(value, pr, trim_zeros, plus_);
 	}
 	Part *format_c(char c)
 	{
@@ -549,7 +576,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_oct32(value, upper_);
+		return format_oct32(value);
 	}
 	Part *format_o64(uint64_t value, int hint)
 	{
@@ -562,7 +589,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_oct64(value, upper_);
+		return format_oct64(value);
 	}
 	Part *format_x32(uint32_t value, int hint)
 	{
@@ -619,7 +646,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_int32(value, force_sign_);
+		return format_int32(value, plus_);
 	}
 	Part *format(uint32_t value, int hint)
 	{
@@ -645,7 +672,7 @@ private:
 			case 'f': return format((double)value, 0);
 			}
 		}
-		return format_int64(value, force_sign_);
+		return format_int64(value, plus_);
 	}
 	Part *format(uint64_t value, int hint)
 	{
@@ -653,7 +680,7 @@ private:
 			switch (hint) {
 			case 'c': return format_c((char)value);
 			case 'd': return format((int64_t)value, 0);
-			case 'o': return format_oct64(value, false);
+			case 'o': return format_oct64(value);
 			case 'x': return format_hex64(value, false);
 			case 'f': return format((double)value, 0);
 			}
@@ -708,7 +735,7 @@ private:
 			upper_ = false;
 			zero_padding_ = false;
 			align_left_ = false;
-			force_sign_ = false;
+			plus_ = false;
 			width_ = -1;
 			precision_ = -1;
 			lflag_ = 0;
@@ -718,7 +745,7 @@ private:
 				if (c == '0') {
 					zero_padding_ = true;
 				} else if (c == '+') {
-					force_sign_ = true;
+					plus_ = true;
 				} else if (c == '-') {
 					align_left_ = true;
 				} else {
@@ -831,11 +858,6 @@ public:
 		head_ = text_.c_str();
 		next_ = head_;
 		return *this;
-	}
-	void destroy()
-	{
-		text_.clear();
-		reset();
 	}
 
 	string_formatter &append(std::string const &s)
