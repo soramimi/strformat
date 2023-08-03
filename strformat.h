@@ -94,6 +94,7 @@ template <> inline uint64_t num<uint64_t>(char const *value)
 		return strtoull(p, nullptr, radix);
 	});
 }
+#ifndef STRFORMAT_NO_FP
 template <> inline double num<double>(char const *value)
 {
 	return parse_number<double>(value, [](char const *p, int radix){
@@ -104,6 +105,7 @@ template <> inline double num<double>(char const *value)
 		}
 	});
 }
+#endif
 template <typename T> static inline T num(std::string const &value)
 {
 	return num<T>(value.c_str());
@@ -190,6 +192,7 @@ private:
 		return "0123456789ABCDEF";
 	}
 	//
+#ifndef STRFORMAT_NO_FP
 	static Part *format_double(double val, int precision, bool trim_zeros, bool plus)
 	{
 		if (std::isnan(val)) return alloc_part("#NAN");
@@ -307,6 +310,7 @@ private:
 
 		return alloc_part(ptr, end);
 	}
+#endif
 	static Part *format_int32(int32_t val, bool force_sign)
 	{
 		int n = 30;
@@ -556,11 +560,13 @@ private:
 		Flush();
 		return r;
 	}
+#ifndef STRFORMAT_NO_FP
 	Part *format_f(double value, bool trim_zeros)
 	{
 		int pr = precision_ < 0 ? 6 : precision_;
 		return format_double(value, pr, trim_zeros, plus_);
 	}
+#endif
 	Part *format_c(char c)
 	{
 		return alloc_part(&c, &c + 1);
@@ -573,7 +579,9 @@ private:
 			case 'd': return format((int32_t)value, 0);
 			case 'u': return format(value, 0);
 			case 'x': return format_x32(value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_oct32(value);
@@ -586,7 +594,9 @@ private:
 			case 'd': return format((int64_t)value, 0);
 			case 'u': return format(value, 0);
 			case 'x': return format_x64(value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_oct64(value);
@@ -599,7 +609,9 @@ private:
 			case 'd': return format((int32_t)value, 0);
 			case 'u': return format(value, 0);
 			case 'o': return format_o32(value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_hex32(value, upper_);
@@ -612,7 +624,9 @@ private:
 			case 'd': return format((int64_t)value, 0);
 			case 'u': return format(value, 0);
 			case 'o': return format_o64(value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_hex64(value, upper_);
@@ -621,6 +635,7 @@ private:
 	{
 		return format((int32_t)c, hint);
 	}
+#ifndef STRFORMAT_NO_FP
 	Part *format(double value, int hint)
 	{
 		if (hint) {
@@ -635,6 +650,7 @@ private:
 		}
 		return format_f(value, false);
 	}
+#endif
 	Part *format(int32_t value, int hint)
 	{
 		if (hint) {
@@ -643,7 +659,9 @@ private:
 			case 'u': return format((uint32_t)value, 0);
 			case 'o': return format_o32((uint32_t)value, 0);
 			case 'x': return format_x32((uint32_t)value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_int32(value, plus_);
@@ -656,7 +674,9 @@ private:
 			case 'd': return format((int32_t)value, 0);
 			case 'o': return format_o32((uint32_t)value, 0);
 			case 'x': return format_x32((uint32_t)value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_uint32(value);
@@ -669,7 +689,9 @@ private:
 			case 'u': return format((uint64_t)value, 0);
 			case 'o': return format_o64((uint64_t)value, 0);
 			case 'x': return format_x64((uint64_t)value, 0);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_int64(value, plus_);
@@ -682,7 +704,9 @@ private:
 			case 'd': return format((int64_t)value, 0);
 			case 'o': return format_oct64(value);
 			case 'x': return format_hex64(value, false);
+#ifndef STRFORMAT_NO_FP
 			case 'f': return format((double)value, 0);
+#endif
 			}
 		}
 		return format_uint64(value);
@@ -708,8 +732,10 @@ private:
 				} else {
 					return format(num<uint64_t>(value), hint);
 				}
+#ifndef STRFORMAT_NO_FP
 			case 'f':
 				return format(num<double>(value), hint);
+#endif
 			}
 		}
 		return alloc_part(value, value + strlen(value));
@@ -876,10 +902,12 @@ public:
 		format([&](int hint){ return format(value, hint); }, width, precision);
 		return *this;
 	}
+#ifndef STRFORMAT_NO_FP
 	string_formatter &f(double value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
+#endif
 	string_formatter &c(char value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);

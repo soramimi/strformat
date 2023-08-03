@@ -11,8 +11,10 @@ void test()
 {
 	// operator ()
 
+#ifndef STRFORMAT_NO_FP
 	TEST1(strformat("(%0*.*f)")(123.456789, 10, 2)
 		 , "(0000123.46)");
+#endif
 
 	// d
 
@@ -92,6 +94,7 @@ void test()
 	TEST1(strformat("%012u").u(0xffffffff)
 		 , "004294967295");
 
+#ifndef STRFORMAT_NO_FP
 	// f (zero)
 
 	TEST1(strformat("%.*f").f(0, -1, 0)
@@ -455,6 +458,7 @@ void test()
 		 , "(#INF      )");
 	TEST1(strformat("(%010f)").f(log(0))
 		 , "(000000#INF)");
+#endif
 
 	// c
 
@@ -519,6 +523,7 @@ void test()
 	TEST1(strformat("%%%s%s%s%s%%").s("abc").s("def")
 		 , "%abcdef%s%s%");
 
+#ifndef STRFORMAT_NO_FP
 	TEST1(strformat("%.s").f(0.00123456)
 		 , "0.001235");
 	TEST1(strformat("%.8s").f(0.00123456)
@@ -535,7 +540,7 @@ void test()
 		 , "-123");
 	TEST1(strformat("%s").f(-123.456)
 		 , "-123.456");
-
+#endif
 
 	// p
 
@@ -572,7 +577,6 @@ void test()
 		 , "(0123ABCD            )", "(000000000123ABCD    )");
 	TEST1(strformat("(%020s)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
-
 
 	// c
 

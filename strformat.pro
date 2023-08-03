@@ -5,6 +5,8 @@ CONFIG -= qt
 
 DESTDIR = $$PWD/_bin
 
+#DEFINES += STRFORMAT_NO_FP
+
 SOURCES += \
 	main.cpp \
     test.cpp
