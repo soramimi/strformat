@@ -14,6 +14,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <string_view>
 
 #ifdef _MSC_VER
 #include <io.h>
@@ -108,7 +109,7 @@ template <> inline double num<double>(char const *value)
 #endif
 template <typename T> static inline T num(std::string const &value)
 {
-	return num<T>(value.c_str());
+	return num<T>(value.data());
 }
 
 class string_formatter {
@@ -139,9 +140,9 @@ private:
 	{
 		return alloc_part(str, strlen(str));
 	}
-	static Part *alloc_part(const std::string &str)
+	static Part *alloc_part(const std::string_view &str)
 	{
-		return alloc_part(str.c_str(), (int)str.size());
+		return alloc_part(str.data(), (int)str.size());
 	}
 	static void free_part(Part **p)
 	{
@@ -740,12 +741,12 @@ private:
 		}
 		return alloc_part(value, value + strlen(value));
 	}
-	Part *format(std::string const &value, int hint)
+	Part *format(std::string_view const &value, int hint)
 	{
 		if (hint == 's') {
 			return alloc_part(value);
 		}
-		return format(value.c_str(), hint);
+		return format(value.data(), hint);
 	}
 	Part *format_p(void *val)
 	{
@@ -852,9 +853,9 @@ private:
 			head_ = next_;
 		}
 	}
-	int length() const
+	int length()
 	{
-		const_cast<string_formatter *>(this)->advance(true);
+		advance(true);
 		int len = 0;
 		for (Part *p = list_.head; p; p = p->next) {
 			len += p->size;
@@ -862,11 +863,15 @@ private:
 		return len;
 	}
 public:
-	string_formatter() = delete;
 	string_formatter(string_formatter &&) = delete;
 	string_formatter(string_formatter const &) = delete;
 	void operator = (string_formatter &&) = delete;
 	void operator = (string_formatter const &) = delete;
+
+	string_formatter()
+	{
+		reset();
+	}
 
 	string_formatter(std::string const &text)
 		: text_(text)
@@ -881,7 +886,7 @@ public:
 	string_formatter &reset()
 	{
 		clear();
-		head_ = text_.c_str();
+		head_ = text_.data();
 		next_ = head_;
 		return *this;
 	}
@@ -952,7 +957,7 @@ public:
 	{
 		return a(value, width, precision);
 	}
-	string_formatter &s(std::string const &value, int width = -1, int precision = -1)
+	string_formatter &s(std::string_view const &value, int width = -1, int precision = -1)
 	{
 		return a(value, width, precision);
 	}
@@ -966,9 +971,9 @@ public:
 	{
 		return a(value, width, precision);
 	}
-	void render(std::function<void (char const *ptr, int len)> const &to) const
+	void render(std::function<void (char const *ptr, int len)> const &to)
 	{
-		const_cast<string_formatter *>(this)->advance(true);
+		advance(true);
 		for (Part *p = list_.head; p; p = p->next) {
 			to(p->data, p->size);
 		}
@@ -1000,7 +1005,7 @@ public:
 	{
 		write_to(stderr);
 	}
-	std::string str() const
+	std::string str()
 	{
 		int n = length();
 		char *p = (char *)alloca(n);
