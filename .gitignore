@@ -4,3 +4,4 @@ Release
 *.sdf
 *.suo
 _bin/
+build/
