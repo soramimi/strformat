@@ -36,9 +36,7 @@ int main()
 	print_result();
 #else
 	std::string s;
-//	s = strformat("%.10f\n").f(0.00012345678901234567890123456789).str();
-//	puts(s.c_str());
-	s = strformat("%.1f\n").f(9.99).str();
+	s = strformat()(13.42).str();
 	puts(s.c_str());
 #endif
 	return 0;

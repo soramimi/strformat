@@ -16,6 +16,12 @@ void test()
 		 , "(0000123.46)");
 #endif
 
+	TEST1(strformat()(12.34)
+		 , "12.34");
+
+	TEST1(strformat("a")(12.34)
+		 , "a12.34");
+
 	// d
 
 	TEST1(strformat("%d").d(0)
@@ -511,7 +517,7 @@ void test()
 	TEST1(strformat("%s%s%s").s("abc").s("def").s("ghi")
 		 , "abcdefghi");
 	TEST1(strformat("%s%s").s("abc").s("def").s("ghi")
-		 , "abcdef");
+		 , "abcdefghi");
 	TEST1(strformat("%s%s%s%s").s("abc").s("def").s("ghi")
 		 , "abcdefghi%s");
 	TEST1(strformat("%s%s%s%s%").s("abc").s("def").s("ghi")
