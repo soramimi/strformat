@@ -1,5 +1,5 @@
 // String Formatter
-// Copyright (C) 2020 S.Fuchita (soramimi_jp)
+// Copyright (C) 2024 S.Fuchita (soramimi_jp)
 // This software is distributed under the MIT license.
 
 #ifndef STRFORMAT_H
@@ -1018,10 +1018,10 @@ public:
 		int n = length();
 		char *p;
 		std::vector<char> tmp;
-		if (n < 0x20000) {
+		if (n < 4096) { // if smaller, use stack
 			p = (char *)alloca(n);
 		} else {
-			tmp.reserve(n);
+			tmp.reserve(n); // if larger, use heap
 			p = tmp.data();
 		}
 		char *d = p;
