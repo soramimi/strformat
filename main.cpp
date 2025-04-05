@@ -27,7 +27,7 @@ int passed = 0;
 int failed = 0;
 int total = 0;
 
-void test_(char const *text, std::string const &result, const char *answer1, const char *answer2)
+void test_(char const *text, std::string const &result, const char *answer1, const char *answer2, char const *file, int line)
 {
 	total++;
 	if (result == answer1) {
@@ -35,7 +35,7 @@ void test_(char const *text, std::string const &result, const char *answer1, con
 	} else if (answer2 && result == answer2) {
 		passed++;
 	} else {
-		strformat("[fail] %s expected '%s'\n , but returned '%s'\n").s(text).s(answer1).s(result).err();
+		strformat("[fail] %s expected '%s', but returned '%s', %s (%d)\n").s(text).s(answer1).s(result).s(file).d(line).err();
 		failed++;
 	}
 }
@@ -60,7 +60,7 @@ int main()
 #if 1
 	test();
 	print_result();
-#elif 1
+#elif 0
 	benchmark();
 #else
 	std::string s;

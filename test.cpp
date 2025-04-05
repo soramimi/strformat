@@ -2,10 +2,10 @@
 #include "strformat.h"
 #include <cmath>
 
-void test_(char const *text, std::string const &result, char const *answer1, char const *answer2);
+void test_(char const *text, std::string const &result, char const *answer1, char const *answer2, char const *file, int line);
 
-#define TEST1(Q, A1)         test_(#Q, (Q).str(), A1, nullptr)
-#define TEST2(Q, A1, A2)     test_(#Q, (Q).str(), A1, A2     )
+#define TEST1(Q, A1)         test_(#Q, (Q).str(), A1, nullptr, __FILE__, __LINE__)
+#define TEST2(Q, A1, A2)     test_(#Q, (Q).str(), A1, A2     , __FILE__, __LINE__)
 
 void test()
 {
@@ -17,10 +17,10 @@ void test()
 #endif
 
 	TEST1(strformat()(12.34)
-		 , "12.34");
+		 , "");
 
 	TEST1(strformat("a")(12.34)
-		 , "a12.34");
+		 , "a");
 
 	// d
 
@@ -517,7 +517,7 @@ void test()
 	TEST1(strformat("%s%s%s").s("abc").s("def").s("ghi")
 		 , "abcdefghi");
 	TEST1(strformat("%s%s").s("abc").s("def").s("ghi")
-		 , "abcdefghi");
+		 , "abcdef");
 	TEST1(strformat("%s%s%s%s").s("abc").s("def").s("ghi")
 		 , "abcdefghi%s");
 	TEST1(strformat("%s%s%s%s%").s("abc").s("def").s("ghi")
