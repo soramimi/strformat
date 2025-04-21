@@ -57,6 +57,11 @@ void benchmark()
 
 int main()
 {
+	if (0) {
+		char *p = setlocale(LC_NUMERIC, "fr_FR.UTF-8");
+		if (p) puts(p);
+	}
+
 #if 1
 	test();
 	print_result();

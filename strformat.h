@@ -24,6 +24,139 @@
 
 namespace strformat_ns {
 
+class misc {
+private:
+	/**
+	 * @brief Return 10 raised to an integer power.
+	 *
+	 * A small lookup table is used for the most common range to avoid
+	 * calling the comparatively expensive `pow()` routine.  Values outside
+	 * the table range fall back to `pow(10.0, exp)`.
+	 *
+	 * @param exp Decimal exponent (positive or negative).
+	 * @return The value 10^exp as a double.
+	 */
+	static double pow10_int(int exp)
+	{
+		// Pre‑computed powers for |exp| ≤ 16
+		static const double tbl[] = {
+			1e+00, 1e+01, 1e+02, 1e+03, 1e+04, 1e+05, 1e+06,
+			1e+07, 1e+08, 1e+09, 1e+10, 1e+11, 1e+12, 1e+13,
+			1e+14, 1e+15, 1e+16
+		};
+		if (exp >= 0 && exp < static_cast<int>(sizeof tbl / sizeof *tbl))
+			return tbl[exp];
+		if (exp <= 0 && exp > -static_cast<int>(sizeof tbl / sizeof *tbl))
+			return 1.0 / tbl[-exp];
+		// Rare case: delegate to libm
+		return std::pow(10.0, exp);
+	}
+public:
+	/**
+	 * @brief Locale‑independent `strtod` clone.
+	 *
+	 * Parses a floating‑point literal from a C‑string.  Leading white‑space,
+	 * an optional sign, fractional part (with a mandatory '.' as the decimal
+	 * separator), and an optional exponent (`e`/`E`) are recognised.
+	 *
+	 * The implementation **ignores the current locale**; the decimal point
+	 * must be `'.'` and no thousands separators are accepted.
+	 *
+	 * @param nptr   Pointer to NUL‑terminated text to parse.
+	 * @param endptr If non‑NULL, receives a pointer to the first character
+	 *               following the parsed number (or `nptr` on failure).
+	 * @return The parsed value.
+	 */
+	static double my_strtod(const char *nptr, char **endptr)
+	{
+		const char *s = nptr;
+		bool sign = false;
+		bool saw_digit = false;
+		int frac_digits = 0;
+		long exp_val = 0;
+		bool exp_sign = false;
+		double value = 0.0;
+
+		// Skip leading white‑space
+		while (std::isspace((unsigned char)*s)) ++s;
+
+		// Parse optional sign
+		if (*s == '+' || *s == '-') {
+			if (*s == '-') sign = true;
+			s++;
+		}
+
+		// Integer part
+		while (std::isdigit((unsigned char)*s)) {
+			saw_digit = true;
+			value = value * 10.0 + (*s - '0');
+			s++;
+		}
+
+		// Fractional part
+		if (*s == '.') {
+			s++;
+			while (std::isdigit((unsigned char)*s)) {
+				saw_digit = true;
+				value = value * 10.0 + (*s - '0');
+				s++;
+				frac_digits++;
+			}
+		}
+
+		// No digits at all -> conversion failure
+		if (!saw_digit) {
+			if (endptr) *endptr = const_cast<char *>(nptr);
+			return 0.0;
+		}
+
+		// Exponent part
+		if (*s == 'e' || *s == 'E') {
+			s++;
+			const char *exp_start = s;
+			if (*s == '+' || *s == '-') {
+				if (*s == '-') exp_sign = true;
+				s++;
+			}
+			if (std::isdigit((unsigned char)*s)) {
+				while (std::isdigit((unsigned char)*s)) {
+					exp_val = exp_val * 10 + (*s - '0');
+					s++;
+				}
+				if (exp_sign) {
+					exp_val = -exp_val;
+				}
+			} else {
+				// Roll back if 'e' is not followed by a valid exponent
+				s = exp_start - 1;
+			}
+		}
+
+		// Scale by 10^(exponent − #fractional‑digits)
+		int total_exp = exp_val - frac_digits;
+		if (total_exp != 0) {
+			value *= pow10_int(total_exp);
+		}
+
+		// Apply sign
+		if (sign) {
+			value = -value;
+		}
+
+		// Set errno on overflow/underflow
+		if (!std::isfinite(value)) {
+			// errno = ERANGE;
+			value = sign ? -HUGE_VAL : HUGE_VAL;
+		} else if (value == 0.0 && saw_digit && total_exp != 0) {
+			// errno = ERANGE;  // underflow
+		}
+
+		// Report where parsing stopped
+		if (endptr) *endptr = const_cast<char *>(s);
+		return value;
+	}
+};
+
 struct NumberParser {
 	char const *p;
 	bool sign = false;
@@ -100,7 +233,14 @@ template <> inline double num<double>(char const *value)
 {
 	return parse_number<double>(value, [](char const *p, int radix){
 		if (radix == 10) {
-			return strtod(p, nullptr);
+			bool use_locale = false;
+			if (use_locale) {
+				// locale-dependent
+				return strtod(p, nullptr);
+			} else {
+				// locale-independent
+				return misc::my_strtod(p, nullptr);
+			}
 		} else {
 			return (double)strtoll(p, nullptr, radix);
 		}
@@ -194,7 +334,7 @@ private:
 	}
 	//
 #ifndef STRFORMAT_NO_FP
-	static Part *format_double(double val, int precision, bool trim_zeros, bool plus)
+	Part *format_double(double val, int precision, bool trim_zeros, bool plus)
 	{
 		if (std::isnan(val)) return alloc_part("#NAN");
 		if (std::isinf(val)) return alloc_part("#INF");
@@ -225,7 +365,7 @@ private:
 
 		if (precision > 0) {
 			dot = end;
-			*end++ = '.';
+			*end++ = decimal_point();
 			double v = val;
 			int e = 0;
 			while (v > 0 && v < 1) {
@@ -885,6 +1025,19 @@ public:
 	~string_formatter()
 	{
 		clear();
+	}
+
+	char decimal_point() const
+	{
+		if (false) {
+#if 0 // currently locale not supported
+			struct lconv *lc = localeconv();
+			if (lc && lc->decimal_point) {
+				return *lc->decimal_point;
+			}
+#endif
+		}
+		return '.';
 	}
 
 	string_formatter &reset()
