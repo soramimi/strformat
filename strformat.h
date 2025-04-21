@@ -257,6 +257,10 @@ template <typename T> static inline T num(std::string const &value, Option_ cons
 }
 
 class string_formatter {
+public:
+	enum Flags {
+		Locale = 0x0001,
+	};
 private:
 	struct Part {
 		Part *next;
@@ -659,48 +663,55 @@ private:
 		return alloc_part(ptr, end);
 	}
 private:
-	std::string text_;
-	char const *head_;
-	char const *next_;
-	PartList list_;
-	bool upper_ : 1;
-	bool zero_padding_ : 1;
-	bool align_left_ : 1;
-	bool plus_ : 1;
-	int width_;
-	int precision_;
-	int lflag_;
-	Option_ opt_;
+	struct Private {
+		std::string text;
+		char const *head;
+		char const *next;
+		PartList list;
+		bool upper : 1;
+		bool zero_padding : 1;
+		bool align_left : 1;
+		bool plus : 1;
+		int width;
+		int precision;
+		int lflag;
+		Option_ opt;
+	} q;
+
+	void _init()
+	{
+		q.list = {};
+	}
 
 	void clear()
 	{
-		free_list(&list_);
+		free_list(&q.list);
 	}
 	bool advance(bool complete)
 	{
 		bool r = false;
 		auto Flush = [&](){
-			if (head_ < next_) {
-				Part *p = alloc_part(head_, next_);
-				add_part(&list_, p);
-				head_ = next_;
+			if (q.head < q.next) {
+				Part *p = alloc_part(q.head, q.next);
+				add_part(&q.list, p);
+				q.head = q.next;
 			}
 		};
-		while (*next_) {
-			if (*next_ == '%') {
-				if (next_[1] == '%') {
-					next_++;
+		while (*q.next) {
+			if (*q.next == '%') {
+				if (q.next[1] == '%') {
+					q.next++;
 					Flush();
-					next_++;
-					head_ = next_;
+					q.next++;
+					q.head = q.next;
 				} else if (complete) {
-					next_++;
+					q.next++;
 				} else {
 					r = true;
 					break;
 				}
 			} else {
-				next_++;
+				q.next++;
 			}
 		}
 		Flush();
@@ -709,8 +720,8 @@ private:
 #ifndef STRFORMAT_NO_FP
 	Part *format_f(double value, bool trim_zeros)
 	{
-		int pr = precision_ < 0 ? 6 : precision_;
-		return format_double(value, pr, trim_zeros, plus_);
+		int pr = q.precision < 0 ? 6 : q.precision;
+		return format_double(value, pr, trim_zeros, q.plus);
 	}
 #endif
 	Part *format_c(char c)
@@ -760,7 +771,7 @@ private:
 #endif
 			}
 		}
-		return format_hex32(value, upper_);
+		return format_hex32(value, q.upper);
 	}
 	Part *format_x64(uint64_t value, int hint)
 	{
@@ -775,7 +786,7 @@ private:
 #endif
 			}
 		}
-		return format_hex64(value, upper_);
+		return format_hex64(value, q.upper);
 	}
 	Part *format(char c, int hint)
 	{
@@ -810,7 +821,7 @@ private:
 #endif
 			}
 		}
-		return format_int32(value, plus_);
+		return format_int32(value, q.plus);
 	}
 	Part *format(uint32_t value, int hint)
 	{
@@ -840,7 +851,7 @@ private:
 #endif
 			}
 		}
-		return format_int64(value, plus_);
+		return format_int64(value, q.plus);
 	}
 	Part *format(uint64_t value, int hint)
 	{
@@ -865,22 +876,22 @@ private:
 		if (hint) {
 			switch (hint) {
 			case 'c':
-				return format_c(num<char>(value, opt_));
+				return format_c(num<char>(value, q.opt));
 			case 'd':
-				if (lflag_ == 0) {
-					return format(num<int32_t>(value, opt_), 0);
+				if (q.lflag == 0) {
+					return format(num<int32_t>(value, q.opt), 0);
 				} else {
-					return format(num<int64_t>(value, opt_), 0);
+					return format(num<int64_t>(value, q.opt), 0);
 				}
 			case 'u': case 'o': case 'x':
-				if (lflag_ == 0) {
-					return format(num<uint32_t>(value, opt_), hint);
+				if (q.lflag == 0) {
+					return format(num<uint32_t>(value, q.opt), hint);
 				} else {
-					return format(num<uint64_t>(value, opt_), hint);
+					return format(num<uint64_t>(value, q.opt), hint);
 				}
 #ifndef STRFORMAT_NO_FP
 			case 'f':
-				return format(num<double>(value, opt_), hint);
+				return format(num<double>(value, q.opt), hint);
 #endif
 			}
 		}
@@ -899,44 +910,44 @@ private:
 	}
 	void reset_format_params()
 	{
-		upper_ = false;
-		zero_padding_ = false;
-		align_left_ = false;
-		plus_ = false;
-		width_ = -1;
-		precision_ = -1;
-		lflag_ = 0;
+		q.upper = false;
+		q.zero_padding = false;
+		q.align_left = false;
+		q.plus = false;
+		q.width = -1;
+		q.precision = -1;
+		q.lflag = 0;
 	}
 	void format(std::function<Part *(int)> const &callback, int width, int precision)
 	{
 		if (advance(false)) {
-			if (*next_ == '%') {
-				next_++;
+			if (*q.next == '%') {
+				q.next++;
 			}
 
 			reset_format_params();
 
 			while (1) {
-				int c = (unsigned char)*next_;
+				int c = (unsigned char)*q.next;
 				if (c == '0') {
-					zero_padding_ = true;
+					q.zero_padding = true;
 				} else if (c == '+') {
-					plus_ = true;
+					q.plus = true;
 				} else if (c == '-') {
-					align_left_ = true;
+					q.align_left = true;
 				} else {
 					break;
 				}
-				next_++;
+				q.next++;
 			}
 
 			auto GetNumber = [&](int alternate_value){
 				int value = -1;
-				if (*next_ == '*') {
-					next_++;
+				if (*q.next == '*') {
+					q.next++;
 				} else {
 					while (1) {
-						int c = (unsigned char)*next_;
+						int c = (unsigned char)*q.next;
 						if (!isdigit(c)) break;
 						if (value < 0) {
 							value = 0;
@@ -944,7 +955,7 @@ private:
 							value *= 10;
 						}
 						value += c - '0';
-						next_++;
+						q.next++;
 					}
 				}
 				if (value < 0) {
@@ -953,119 +964,134 @@ private:
 				return value;
 			};
 
-			width_ = GetNumber(width);
+			q.width = GetNumber(width);
 
-			if (*next_ == '.') {
-				next_++;
+			if (*q.next == '.') {
+				q.next++;
 			}
 
-			precision_ = GetNumber(precision);
+			q.precision = GetNumber(precision);
 
-			while (*next_ == 'l') {
-				lflag_++;
-				next_++;
+			while (*q.next == 'l') {
+				q.lflag++;
+				q.next++;
 			}
 
 			Part *p = nullptr;
 
-			int c = (unsigned char)*next_;
+			int c = (unsigned char)*q.next;
 			if (isupper(c)) {
-				upper_ = true;
+				q.upper = true;
 				c = tolower(c);
 			}
 			if (isalpha(c)) {
 				p = callback(c);
-				next_++;
+				q.next++;
 			}
 			if (p) {
-				int padlen = width_ - p->size;
-				if (padlen > 0 && !align_left_) {
-					if (zero_padding_) {
+				int padlen = q.width - p->size;
+				if (padlen > 0 && !q.align_left) {
+					if (q.zero_padding) {
 						char c = p->data[0];
-						add_chars(&list_, '0', padlen);
+						add_chars(&q.list, '0', padlen);
 						if (c == '+' || c == '-') {
-							list_.last->data[0] = c;
+							q.list.last->data[0] = c;
 							p->data[0] = '0';
 						}
 					} else {
-						add_chars(&list_, ' ', padlen);
+						add_chars(&q.list, ' ', padlen);
 					}
 				}
 
-				add_part(&list_, p);
+				add_part(&q.list, p);
 
-				if (padlen > 0 && align_left_) {
-					add_chars(&list_, ' ', padlen);
+				if (padlen > 0 && q.align_left) {
+					add_chars(&q.list, ' ', padlen);
 				}
 			}
 
-			head_ = next_;
+			q.head = q.next;
 		}
 	}
 	int length()
 	{
 		advance(true);
 		int len = 0;
-		for (Part *p = list_.head; p; p = p->next) {
+		for (Part *p = q.list.head; p; p = p->next) {
 			len += p->size;
 		}
 		return len;
 	}
+	void use_locale(bool use)
+	{
+		if (use) {
+			q.opt.lc = localeconv();
+		} else {
+			q.opt.lc = nullptr;
+		}
+	}
+	void set_flags(int flags)
+	{
+		use_locale(flags & Locale);
+	}
 public:
-	string_formatter(string_formatter &&) = delete;
 	string_formatter(string_formatter const &) = delete;
-	void operator = (string_formatter &&) = delete;
 	void operator = (string_formatter const &) = delete;
 
-	string_formatter()
+	string_formatter(string_formatter &&r)
 	{
-		reset();
+		q = r.q;
+		r._init();
+	}
+	void operator = (string_formatter &&r)
+	{
+		clear();
+		q = r.q;
+		r._init();
+	}
+
+	string_formatter(int flags = 0, std::string const &text = {})
+	{
+		reset(flags, text);
 	}
 
 	string_formatter(std::string const &text)
-		: text_(text)
 	{
-		reset();
+		reset(0, text);
 	}
 	~string_formatter()
 	{
 		clear();
 	}
 
-	string_formatter &use_locale(bool use)
-	{
-		if (use) {
-			opt_.lc = localeconv();
-		} else {
-			opt_.lc = nullptr;
-		}
-		return *this;
-	}
-
 	char decimal_point() const
 	{
-		if (opt_.lc && opt_.lc->decimal_point) {
-			return *opt_.lc->decimal_point;
+		if (q.opt.lc && q.opt.lc->decimal_point) {
+			return *q.opt.lc->decimal_point;
 		}
 		return '.';
 	}
 
-	string_formatter &reset()
+	string_formatter &reset(int flags, std::string const &text)
 	{
 		clear();
-		head_ = text_.data();
-		next_ = head_;
+		q.text = text;
+		q.head = q.text.data();
+		q.next = q.head;
+
+		use_locale(flags & Locale);
+
 		return *this;
 	}
 
 	string_formatter &append(std::string const &s)
 	{
-		text_ += s;
+		q.text += s;
 		return *this;
 	}
 	string_formatter &append(char const *s)
 	{
-		text_ += s;
+		q.text += s;
 		return *this;
 	}
 
@@ -1141,7 +1167,7 @@ public:
 	void render(std::function<void (char const *ptr, int len)> const &to)
 	{
 		advance(true);
-		for (Part *p = list_.head; p; p = p->next) {
+		for (Part *p = q.list.head; p; p = p->next) {
 			to(p->data, p->size);
 		}
 	}
@@ -1196,26 +1222,8 @@ public:
 	}
 };
 
-class string_formatter_with_locale : public string_formatter {
-public:
-	string_formatter_with_locale()
-	{
-		use_locale(true);
-	}
-	string_formatter_with_locale(std::string const &text)
-		: string_formatter(text)
-	{
-		use_locale(true);
-	}
-	string_formatter_with_locale(string_formatter_with_locale &&) = delete;
-	string_formatter_with_locale(string_formatter_with_locale const &) = delete;
-	void operator = (string_formatter_with_locale &&) = delete;
-	void operator = (string_formatter_with_locale const &) = delete;
-};
-
 } // namespace strformat_ns
 
 using strformat = strformat_ns::string_formatter;
-using strformatl = strformat_ns::string_formatter_with_locale;
 
 #endif // STRFORMAT_H
