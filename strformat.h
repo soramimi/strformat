@@ -197,44 +197,48 @@ template <typename T> static inline T parse_number(char const *ptr, std::functio
 	if (t.sign) v = -v;
 	return v;
 }
-template <typename T> static inline T num(char const *value);
-template <> inline char num<char>(char const *value)
+
+struct Option_ {
+	struct lconv *lc = nullptr;
+};
+
+template <typename T> static inline T num(char const *value, Option_ const &opt);
+template <> inline char num<char>(char const *value, Option_ const &opt)
 {
 	return parse_number<char>(value, [](char const *p, int radix){
 		return (char)strtol(p, nullptr, radix);
 	});
 }
-template <> inline int32_t num<int32_t>(char const *value)
+template <> inline int32_t num<int32_t>(char const *value, Option_ const &opt)
 {
 	return parse_number<int32_t>(value, [](char const *p, int radix){
 		return strtol(p, nullptr, radix);
 	});
 }
-template <> inline uint32_t num<uint32_t>(char const *value)
+template <> inline uint32_t num<uint32_t>(char const *value, Option_ const &opt)
 {
 	return parse_number<uint32_t>(value, [](char const *p, int radix){
 		return strtoul(p, nullptr, radix);
 	});
 }
-template <> inline int64_t num<int64_t>(char const *value)
+template <> inline int64_t num<int64_t>(char const *value, Option_ const &opt)
 {
 	return parse_number<int64_t>(value, [](char const *p, int radix){
 		return strtoll(p, nullptr, radix);
 	});
 }
-template <> inline uint64_t num<uint64_t>(char const *value)
+template <> inline uint64_t num<uint64_t>(char const *value, Option_ const &opt)
 {
 	return parse_number<uint64_t>(value, [](char const *p, int radix){
 		return strtoull(p, nullptr, radix);
 	});
 }
 #ifndef STRFORMAT_NO_FP
-template <> inline double num<double>(char const *value)
+template <> inline double num<double>(char const *value, Option_ const &opt)
 {
-	return parse_number<double>(value, [](char const *p, int radix){
+	return parse_number<double>(value, [&opt](char const *p, int radix){
 		if (radix == 10) {
-			bool use_locale = false;
-			if (use_locale) {
+			if (opt.lc) {
 				// locale-dependent
 				return strtod(p, nullptr);
 			} else {
@@ -247,9 +251,9 @@ template <> inline double num<double>(char const *value)
 	});
 }
 #endif
-template <typename T> static inline T num(std::string const &value)
+template <typename T> static inline T num(std::string const &value, Option_ const &opt)
 {
-	return num<T>(value.data());
+	return num<T>(value.data(), opt);
 }
 
 class string_formatter {
@@ -666,6 +670,7 @@ private:
 	int width_;
 	int precision_;
 	int lflag_;
+	Option_ opt_;
 
 	void clear()
 	{
@@ -860,22 +865,22 @@ private:
 		if (hint) {
 			switch (hint) {
 			case 'c':
-				return format_c(num<char>(value));
+				return format_c(num<char>(value, opt_));
 			case 'd':
 				if (lflag_ == 0) {
-					return format(num<int32_t>(value), 0);
+					return format(num<int32_t>(value, opt_), 0);
 				} else {
-					return format(num<int64_t>(value), 0);
+					return format(num<int64_t>(value, opt_), 0);
 				}
 			case 'u': case 'o': case 'x':
 				if (lflag_ == 0) {
-					return format(num<uint32_t>(value), hint);
+					return format(num<uint32_t>(value, opt_), hint);
 				} else {
-					return format(num<uint64_t>(value), hint);
+					return format(num<uint64_t>(value, opt_), hint);
 				}
 #ifndef STRFORMAT_NO_FP
 			case 'f':
-				return format(num<double>(value), hint);
+				return format(num<double>(value, opt_), hint);
 #endif
 			}
 		}
@@ -1027,15 +1032,20 @@ public:
 		clear();
 	}
 
+	string_formatter &use_locale(bool use)
+	{
+		if (use) {
+			opt_.lc = localeconv();
+		} else {
+			opt_.lc = nullptr;
+		}
+		return *this;
+	}
+
 	char decimal_point() const
 	{
-		if (false) {
-#if 0 // currently locale not supported
-			struct lconv *lc = localeconv();
-			if (lc && lc->decimal_point) {
-				return *lc->decimal_point;
-			}
-#endif
+		if (opt_.lc && opt_.lc->decimal_point) {
+			return *opt_.lc->decimal_point;
 		}
 		return '.';
 	}
@@ -1186,8 +1196,26 @@ public:
 	}
 };
 
+class string_formatter_with_locale : public string_formatter {
+public:
+	string_formatter_with_locale()
+	{
+		use_locale(true);
+	}
+	string_formatter_with_locale(std::string const &text)
+		: string_formatter(text)
+	{
+		use_locale(true);
+	}
+	string_formatter_with_locale(string_formatter_with_locale &&) = delete;
+	string_formatter_with_locale(string_formatter_with_locale const &) = delete;
+	void operator = (string_formatter_with_locale &&) = delete;
+	void operator = (string_formatter_with_locale const &) = delete;
+};
+
 } // namespace strformat_ns
 
 using strformat = strformat_ns::string_formatter;
+using strformatl = strformat_ns::string_formatter_with_locale;
 
 #endif // STRFORMAT_H
