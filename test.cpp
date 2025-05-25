@@ -12,595 +12,595 @@ void test()
 	// operator ()
 
 #ifndef STRFORMAT_NO_FP
-	TEST1(strformat("(%0*.*f)")(123.456789, 10, 2)
+	TEST1(strf("(%0*.*f)")(123.456789, 10, 2)
 		 , "(0000123.46)");
 #endif
 
-	TEST1(strformat()(12.34)
+	TEST1(strf()(12.34)
 		 , "");
 
-	TEST1(strformat("a")(12.34)
+	TEST1(strf("a")(12.34)
 		 , "a");
 
 	// d
 
-	TEST1(strformat("%d").d(0)
+	TEST1(strf("%d").d(0)
 		 , "0");
-	TEST1(strformat("%d").d(123)
+	TEST1(strf("%d").d(123)
 		 , "123");
-	TEST1(strformat("%d").d(-123)
+	TEST1(strf("%d").d(-123)
 		 , "-123");
-	TEST1(strformat("%d").d(0x7fffffff)
+	TEST1(strf("%d").d(0x7fffffff)
 		 , "2147483647");
-	TEST1(strformat("%d").d(0x80000000)
+	TEST1(strf("%d").d(0x80000000)
 		 , "-2147483648");
-	TEST1(strformat("%d").d(0xffffffff)
+	TEST1(strf("%d").d(0xffffffff)
 		 , "-1");
-	TEST1(strformat("%12d").d(0)
+	TEST1(strf("%12d").d(0)
 		 , "           0");
-	TEST1(strformat("%12d").d(123)
+	TEST1(strf("%12d").d(123)
 		 , "         123");
-	TEST1(strformat("%12d").d(-123)
+	TEST1(strf("%12d").d(-123)
 		 , "        -123");
-	TEST1(strformat("%12d").d(0x7fffffff)
+	TEST1(strf("%12d").d(0x7fffffff)
 		 , "  2147483647");
-	TEST1(strformat("%12d").d(0x80000000)
+	TEST1(strf("%12d").d(0x80000000)
 		 , " -2147483648");
-	TEST1(strformat("%12d").d(0xffffffff)
+	TEST1(strf("%12d").d(0xffffffff)
 		 , "          -1");
-	TEST1(strformat("%012d").d(0)
+	TEST1(strf("%012d").d(0)
 		 , "000000000000");
-	TEST1(strformat("%012d").d(123)
+	TEST1(strf("%012d").d(123)
 		 , "000000000123");
-	TEST1(strformat("%012d").d(-123)
+	TEST1(strf("%012d").d(-123)
 		 , "-00000000123");
-	TEST1(strformat("%012d").d(0x7fffffff)
+	TEST1(strf("%012d").d(0x7fffffff)
 		 , "002147483647");
-	TEST1(strformat("%012d").d(0x80000000)
+	TEST1(strf("%012d").d(0x80000000)
 		 , "-02147483648");
-	TEST1(strformat("%012d").d(0xffffffff)
+	TEST1(strf("%012d").d(0xffffffff)
 		 , "-00000000001");
 
 	// u
 
-	TEST1(strformat("%u").u(0)
+	TEST1(strf("%u").u(0)
 		 , "0");
-	TEST1(strformat("%u").u(123)
+	TEST1(strf("%u").u(123)
 		 , "123");
-	TEST1(strformat("%u").u(-123)
+	TEST1(strf("%u").u(-123)
 		 , "4294967173");
-	TEST1(strformat("%u").u(0x7fffffff)
+	TEST1(strf("%u").u(0x7fffffff)
 		 , "2147483647");
-	TEST1(strformat("%u").u(0x80000000)
+	TEST1(strf("%u").u(0x80000000)
 		 , "2147483648");
-	TEST1(strformat("%u").u(0xffffffff)
+	TEST1(strf("%u").u(0xffffffff)
 		 , "4294967295");
-	TEST1(strformat("%12u").u(0)
+	TEST1(strf("%12u").u(0)
 		 , "           0");
-	TEST1(strformat("%12u").u(123)
+	TEST1(strf("%12u").u(123)
 		 , "         123");
-	TEST1(strformat("%12u").u(-123)
+	TEST1(strf("%12u").u(-123)
 		 , "  4294967173");
-	TEST1(strformat("%12u").u(0x7fffffff)
+	TEST1(strf("%12u").u(0x7fffffff)
 		 , "  2147483647");
-	TEST1(strformat("%12u").u(0x80000000)
+	TEST1(strf("%12u").u(0x80000000)
 		 , "  2147483648");
-	TEST1(strformat("%12u").u(0xffffffff)
+	TEST1(strf("%12u").u(0xffffffff)
 		 , "  4294967295");
-	TEST1(strformat("%012u").u(0)
+	TEST1(strf("%012u").u(0)
 		 , "000000000000");
-	TEST1(strformat("%012u").u(123)
+	TEST1(strf("%012u").u(123)
 		 , "000000000123");
-	TEST1(strformat("%012u").u(-123)
+	TEST1(strf("%012u").u(-123)
 		 , "004294967173");
-	TEST1(strformat("%012u").u(0x7fffffff)
+	TEST1(strf("%012u").u(0x7fffffff)
 		 , "002147483647");
-	TEST1(strformat("%012u").u(0x80000000)
+	TEST1(strf("%012u").u(0x80000000)
 		 , "002147483648");
-	TEST1(strformat("%012u").u(0xffffffff)
+	TEST1(strf("%012u").u(0xffffffff)
 		 , "004294967295");
 
 #ifndef STRFORMAT_NO_FP
 	// f (zero)
 
-	TEST1(strformat("%.*f").f(0, -1, 0)
+	TEST1(strf("%.*f").f(0, -1, 0)
 		 , "0");
-	TEST1(strformat("%.*f").f(0, -1, 1)
+	TEST1(strf("%.*f").f(0, -1, 1)
 		 , "0.0");
-	TEST1(strformat("%.*f").f(0, -1, 2)
+	TEST1(strf("%.*f").f(0, -1, 2)
 		 , "0.00");
-	TEST1(strformat("%.*f").f(0, -1, 5)
+	TEST1(strf("%.*f").f(0, -1, 5)
 		 , "0.00000");
-	TEST1(strformat("%.*f").f(0, -1, 10)
+	TEST1(strf("%.*f").f(0, -1, 10)
 		 , "0.0000000000");
-	TEST1(strformat("%.*f").f(0, -1, 15)
+	TEST1(strf("%.*f").f(0, -1, 15)
 		 , "0.000000000000000");
-	TEST1(strformat("%.*f").f(0, -1, 30)
+	TEST1(strf("%.*f").f(0, -1, 30)
 		 , "0.000000000000000000000000000000");
-	TEST1(strformat("(%10.3f)").f(0)
+	TEST1(strf("(%10.3f)").f(0)
 		 , "(     0.000)");
-	TEST1(strformat("(%-10.3f)").f(0)
+	TEST1(strf("(%-10.3f)").f(0)
 		 , "(0.000     )");
-	TEST1(strformat("(%+10.3f)").f(0)
+	TEST1(strf("(%+10.3f)").f(0)
 		 , "(    +0.000)");
-	TEST1(strformat("(%+-10.3f)").f(0)
+	TEST1(strf("(%+-10.3f)").f(0)
 		 , "(+0.000    )");
-	TEST1(strformat("(%010.3f)").f(0)
+	TEST1(strf("(%010.3f)").f(0)
 		 , "(000000.000)");
-	TEST1(strformat("(%+010.3f)").f(0)
+	TEST1(strf("(%+010.3f)").f(0)
 		 , "(+00000.000)");
 
 	// f (positive)
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 0)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 0)
 		 , "0");
-	TEST1(strformat("%.*f").f(123.0, -1, 0)
+	TEST1(strf("%.*f").f(123.0, -1, 0)
 		 , "123");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 0)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 0)
 		 , "123");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 0)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 0)
 		 , "12345678901234567000");
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 1)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 1)
 		 , "0.0");
-	TEST1(strformat("%.*f").f(123.0, -1, 1)
+	TEST1(strf("%.*f").f(123.0, -1, 1)
 		 , "123.0");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 1)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 1)
 		 , "123.5");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 1)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 1)
 		 , "12345678901234567000.0");
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 2)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 2)
 		 , "0.00");
-	TEST1(strformat("%.*f").f(123.0, -1, 2)
+	TEST1(strf("%.*f").f(123.0, -1, 2)
 		 , "123.00");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 2)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 2)
 		 , "123.46");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 2)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 2)
 		 , "12345678901234567000.00");
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 5)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 5)
 		 , "0.00000");
-	TEST1(strformat("%.*f").f(123.0, -1, 5)
+	TEST1(strf("%.*f").f(123.0, -1, 5)
 		 , "123.00000");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 5)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 5)
 		 , "123.45679");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 5)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 5)
 		 , "12345678901234567000.00000");
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 10)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 10)
 		 , "0.0000000123");
-	TEST1(strformat("%.*f").f(123.0, -1, 10)
+	TEST1(strf("%.*f").f(123.0, -1, 10)
 		 , "123.0000000000");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 10)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 10)
 		 , "123.4567890123");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 10)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 10)
 		 , "12345678901234567000.0000000000");
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 15)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 15)
 		 , "0.000000012345679");
-	TEST1(strformat("%.*f").f(123.0, -1, 15)
+	TEST1(strf("%.*f").f(123.0, -1, 15)
 		 , "123.000000000000000");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 15)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 15)
 		 , "123.456789012345600");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 15)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 15)
 		 , "12345678901234567000.000000000000000");
 
-	TEST1(strformat("%.*f").f(0.000000012345678901234567890123456789, -1, 30)
+	TEST1(strf("%.*f").f(0.000000012345678901234567890123456789, -1, 30)
 		 , "0.000000012345678901234560000000");
-	TEST1(strformat("%.*f").f(123.0, -1, 30)
+	TEST1(strf("%.*f").f(123.0, -1, 30)
 		 , "123.000000000000000000000000000000");
-	TEST1(strformat("%.*f").f(123.4567890123456789, -1, 30)
+	TEST1(strf("%.*f").f(123.4567890123456789, -1, 30)
 		 , "123.456789012345600000000000000000");
-	TEST1(strformat("%.*f").f(12345678901234567890.0, -1, 30)
+	TEST1(strf("%.*f").f(12345678901234567890.0, -1, 30)
 		 , "12345678901234567000.000000000000000000000000000000");
 
 
-	TEST1(strformat("(%f)").f(123.456)
+	TEST1(strf("(%f)").f(123.456)
 		 , "(123.456000)");
-	TEST1(strformat("(%0f)").f(123.456)
+	TEST1(strf("(%0f)").f(123.456)
 		 , "(123.456000)");
-	TEST1(strformat("(%-f)").f(123.456)
+	TEST1(strf("(%-f)").f(123.456)
 		 , "(123.456000)");
-	TEST1(strformat("(%+0f)").f(123.456)
+	TEST1(strf("(%+0f)").f(123.456)
 		 , "(+123.456000)");
-	TEST1(strformat("(%f)").f(1.23456789)
+	TEST1(strf("(%f)").f(1.23456789)
 		 , "(1.234568)");
-	TEST1(strformat("(%+f)").f(1.23456789)
+	TEST1(strf("(%+f)").f(1.23456789)
 		 , "(+1.234568)");
 
-	TEST1(strformat("(%15.4f)").f(123.456)
+	TEST1(strf("(%15.4f)").f(123.456)
 		 , "(       123.4560)");
-	TEST1(strformat("(%015.4f)").f(123.456)
+	TEST1(strf("(%015.4f)").f(123.456)
 		 , "(0000000123.4560)");
-	TEST1(strformat("(%-15.4f)").f(123.456)
+	TEST1(strf("(%-15.4f)").f(123.456)
 		 , "(123.4560       )");
-	TEST1(strformat("(%+015.4f)").f(123.456)
+	TEST1(strf("(%+015.4f)").f(123.456)
 		 , "(+000000123.4560)");
 
-	TEST1(strformat("(%*.4f)").f(123.456, 15)
+	TEST1(strf("(%*.4f)").f(123.456, 15)
 		 , "(       123.4560)");
-	TEST1(strformat("(%0*.4f)").f(123.456, 15)
+	TEST1(strf("(%0*.4f)").f(123.456, 15)
 		 , "(0000000123.4560)");
-	TEST1(strformat("(%-*.4f)").f(123.456, 15)
+	TEST1(strf("(%-*.4f)").f(123.456, 15)
 		 , "(123.4560       )");
-	TEST1(strformat("(%+0*.4f)").f(123.456, 15)
+	TEST1(strf("(%+0*.4f)").f(123.456, 15)
 		 , "(+000000123.4560)");
 
-	TEST1(strformat("(%.*f)").f(123.456, -1, 4)
+	TEST1(strf("(%.*f)").f(123.456, -1, 4)
 		 , "(123.4560)");
-	TEST1(strformat("(%0.*f)").f(123.456, -1, 4)
+	TEST1(strf("(%0.*f)").f(123.456, -1, 4)
 		 , "(123.4560)");
-	TEST1(strformat("(%-.*f)").f(123.456, -1, 4)
+	TEST1(strf("(%-.*f)").f(123.456, -1, 4)
 		 , "(123.4560)");
-	TEST1(strformat("(%+0.*f)").f(123.456, -1, 4)
+	TEST1(strf("(%+0.*f)").f(123.456, -1, 4)
 		 , "(+123.4560)");
 
-	TEST1(strformat("(%*.*f)").f(123.456, 15, 4)
+	TEST1(strf("(%*.*f)").f(123.456, 15, 4)
 		 , "(       123.4560)");
-	TEST1(strformat("(%0*.*f)").f(123.456, 15, 4)
+	TEST1(strf("(%0*.*f)").f(123.456, 15, 4)
 		 , "(0000000123.4560)");
-	TEST1(strformat("(%-*.*f)").f(123.456, 15, 4)
+	TEST1(strf("(%-*.*f)").f(123.456, 15, 4)
 		 , "(123.4560       )");
-	TEST1(strformat("(%+0*.*f)").f(123.456, 15, 4)
+	TEST1(strf("(%+0*.*f)").f(123.456, 15, 4)
 		 , "(+000000123.4560)");
 
-	TEST1(strformat("%.*f").f(0.9, -1, 0)
+	TEST1(strf("%.*f").f(0.9, -1, 0)
 		 , "1");
-	TEST1(strformat("%.*f").f(9.9, -1, 0)
+	TEST1(strf("%.*f").f(9.9, -1, 0)
 		 , "10");
-	TEST1(strformat("%.*f").f(9.99, -1, 1)
+	TEST1(strf("%.*f").f(9.99, -1, 1)
 		 , "10.0");
 
 	// f (negative)
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 0)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 0)
 		 , "-0");
-	TEST1(strformat("%.*f").f(-123.0, -1, 0)
+	TEST1(strf("%.*f").f(-123.0, -1, 0)
 		 , "-123");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 0)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 0)
 		 , "-123");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 0)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 0)
 		 , "-12345678901234567000");
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 1)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 1)
 		 , "-0.0");
-	TEST1(strformat("%.*f").f(-123.0, -1, 1)
+	TEST1(strf("%.*f").f(-123.0, -1, 1)
 		 , "-123.0");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 1)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 1)
 		 , "-123.5");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 1)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 1)
 		 , "-12345678901234567000.0");
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 2)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 2)
 		 , "-0.00");
-	TEST1(strformat("%.*f").f(-123.0, -1, 2)
+	TEST1(strf("%.*f").f(-123.0, -1, 2)
 		 , "-123.00");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 2)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 2)
 		 , "-123.46");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 2)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 2)
 		 , "-12345678901234567000.00");
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 5)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 5)
 		 , "-0.00000");
-	TEST1(strformat("%.*f").f(-123.0, -1, 5)
+	TEST1(strf("%.*f").f(-123.0, -1, 5)
 		 , "-123.00000");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 5)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 5)
 		 , "-123.45679");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 5)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 5)
 		 , "-12345678901234567000.00000");
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 10)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 10)
 		 , "-0.0000000123");
-	TEST1(strformat("%.*f").f(-123.0, -1, 10)
+	TEST1(strf("%.*f").f(-123.0, -1, 10)
 		 , "-123.0000000000");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 10)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 10)
 		 , "-123.4567890123");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 10)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 10)
 		 , "-12345678901234567000.0000000000");
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 15)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 15)
 		 , "-0.000000012345679");
-	TEST1(strformat("%.*f").f(-123.0, -1, 15)
+	TEST1(strf("%.*f").f(-123.0, -1, 15)
 		 , "-123.000000000000000");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 15)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 15)
 		 , "-123.456789012345600");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 15)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 15)
 		 , "-12345678901234567000.000000000000000");
 
-	TEST1(strformat("%.*f").f(-0.000000012345678901234567890123456789, -1, 30)
+	TEST1(strf("%.*f").f(-0.000000012345678901234567890123456789, -1, 30)
 		 , "-0.000000012345678901234560000000");
-	TEST1(strformat("%.*f").f(-123.0, -1, 30)
+	TEST1(strf("%.*f").f(-123.0, -1, 30)
 		 , "-123.000000000000000000000000000000");
-	TEST1(strformat("%.*f").f(-123.4567890123456789, -1, 30)
+	TEST1(strf("%.*f").f(-123.4567890123456789, -1, 30)
 		 , "-123.456789012345600000000000000000");
-	TEST1(strformat("%.*f").f(-12345678901234567890.0, -1, 30)
+	TEST1(strf("%.*f").f(-12345678901234567890.0, -1, 30)
 		 , "-12345678901234567000.000000000000000000000000000000");
 
-	TEST1(strformat("(%f)").f(-123.456)
+	TEST1(strf("(%f)").f(-123.456)
 		 , "(-123.456000)");
-	TEST1(strformat("(%0f)").f(-123.456)
+	TEST1(strf("(%0f)").f(-123.456)
 		 , "(-123.456000)");
-	TEST1(strformat("(%-f)").f(-123.456)
+	TEST1(strf("(%-f)").f(-123.456)
 		 , "(-123.456000)");
-	TEST1(strformat("(%+0f)").f(-123.456)
+	TEST1(strf("(%+0f)").f(-123.456)
 		 , "(-123.456000)");
-	TEST1(strformat("(%f)").f(-1.23456789)
+	TEST1(strf("(%f)").f(-1.23456789)
 		 , "(-1.234568)");
-	TEST1(strformat("(%+f)").f(-1.23456789)
+	TEST1(strf("(%+f)").f(-1.23456789)
 		 , "(-1.234568)");
 
-	TEST1(strformat("(%15.4f)").f(-123.456)
+	TEST1(strf("(%15.4f)").f(-123.456)
 		 , "(      -123.4560)");
-	TEST1(strformat("(%015.4f)").f(-123.456)
+	TEST1(strf("(%015.4f)").f(-123.456)
 		 , "(-000000123.4560)");
-	TEST1(strformat("(%-15.4f)").f(-123.456)
+	TEST1(strf("(%-15.4f)").f(-123.456)
 		 , "(-123.4560      )");
-	TEST1(strformat("(%+015.4f)").f(-123.456)
+	TEST1(strf("(%+015.4f)").f(-123.456)
 		 , "(-000000123.4560)");
 
-	TEST1(strformat("(%*.4f)").f(-123.456, 15)
+	TEST1(strf("(%*.4f)").f(-123.456, 15)
 		 , "(      -123.4560)");
-	TEST1(strformat("(%0*.4f)").f(-123.456, 15)
+	TEST1(strf("(%0*.4f)").f(-123.456, 15)
 		 , "(-000000123.4560)");
-	TEST1(strformat("(%-*.4f)").f(-123.456, 15)
+	TEST1(strf("(%-*.4f)").f(-123.456, 15)
 		 , "(-123.4560      )");
-	TEST1(strformat("(%+0*.4f)").f(-123.456, 15)
+	TEST1(strf("(%+0*.4f)").f(-123.456, 15)
 		 , "(-000000123.4560)");
 
-	TEST1(strformat("(%.*f)").f(-123.456, -1, 4)
+	TEST1(strf("(%.*f)").f(-123.456, -1, 4)
 		 , "(-123.4560)");
-	TEST1(strformat("(%0.*f)").f(-123.456, -1, 4)
+	TEST1(strf("(%0.*f)").f(-123.456, -1, 4)
 		 , "(-123.4560)");
-	TEST1(strformat("(%-.*f)").f(-123.456, -1, 4)
+	TEST1(strf("(%-.*f)").f(-123.456, -1, 4)
 		 , "(-123.4560)");
-	TEST1(strformat("(%+0.*f)").f(-123.456, -1, 4)
+	TEST1(strf("(%+0.*f)").f(-123.456, -1, 4)
 		 , "(-123.4560)");
 
-	TEST1(strformat("(%*.*f)").f(-123.456, 15, 4)
+	TEST1(strf("(%*.*f)").f(-123.456, 15, 4)
 		 , "(      -123.4560)");
-	TEST1(strformat("(%0*.*f)").f(-123.456, 15, 4)
+	TEST1(strf("(%0*.*f)").f(-123.456, 15, 4)
 		 , "(-000000123.4560)");
-	TEST1(strformat("(%-*.*f)").f(-123.456, 15, 4)
+	TEST1(strf("(%-*.*f)").f(-123.456, 15, 4)
 		 , "(-123.4560      )");
-	TEST1(strformat("(%+0*.*f)").f(-123.456, 15, 4)
+	TEST1(strf("(%+0*.*f)").f(-123.456, 15, 4)
 		 , "(-000000123.4560)");
 
-	TEST1(strformat("%.*f").f(-0.9, -1, 0)
+	TEST1(strf("%.*f").f(-0.9, -1, 0)
 		 , "-1");
-	TEST1(strformat("%.*f").f(-9.9, -1, 0)
+	TEST1(strf("%.*f").f(-9.9, -1, 0)
 		 , "-10");
-	TEST1(strformat("%.*f").f(-9.99, -1, 1)
+	TEST1(strf("%.*f").f(-9.99, -1, 1)
 		 , "-10.0");
 
 	// f (string)
 
-	TEST1(strformat("(%f)").s("")
+	TEST1(strf("(%f)").s("")
 		 , "(0.000000)");
-	TEST1(strformat("(%f)").s("123")
+	TEST1(strf("(%f)").s("123")
 		 , "(123.000000)");
-	TEST1(strformat("(%f)").s("123.")
+	TEST1(strf("(%f)").s("123.")
 		 , "(123.000000)");
-	TEST1(strformat("(%f)").s(".123")
+	TEST1(strf("(%f)").s(".123")
 		 , "(0.123000)");
-	TEST1(strformat("(%f)").s("+.123")
+	TEST1(strf("(%f)").s("+.123")
 		 , "(0.123000)");
-	TEST1(strformat("(%f)").s("-.123")
+	TEST1(strf("(%f)").s("-.123")
 		 , "(-0.123000)");
-	TEST1(strformat("(%f)").s("123.456")
+	TEST1(strf("(%f)").s("123.456")
 		 , "(123.456000)");
-	TEST1(strformat("(%+f)").s("123.456")
+	TEST1(strf("(%+f)").s("123.456")
 		 , "(+123.456000)");
-	TEST1(strformat("(%+f)").s("+123.456")
+	TEST1(strf("(%+f)").s("+123.456")
 		 , "(+123.456000)");
-	TEST1(strformat("(%f)").s("-123.456")
+	TEST1(strf("(%f)").s("-123.456")
 		 , "(-123.456000)");
-	TEST1(strformat("(%f)").s("123,456")
+	TEST1(strf("(%f)").s("123,456")
 		 , "(123.000000)");
-	TEST1(strformat("(%f)").s("0x50")
+	TEST1(strf("(%f)").s("0x50")
 		 , "(80.000000)");
-	TEST1(strformat("(%+f)").s("0x50")
+	TEST1(strf("(%+f)").s("0x50")
 		 , "(+80.000000)");
-	TEST1(strformat("(%+f)").s("+0x50")
+	TEST1(strf("(%+f)").s("+0x50")
 		 , "(+80.000000)");
-	TEST1(strformat("(%f)").s("-0x50")
+	TEST1(strf("(%f)").s("-0x50")
 		 , "(-80.000000)");
-	TEST1(strformat("(%f)").s("0x50.5")
+	TEST1(strf("(%f)").s("0x50.5")
 		 , "(80.000000)");
-	TEST1(strformat("(%f)").s("0755")
+	TEST1(strf("(%f)").s("0755")
 		 , "(493.000000)");
-	TEST1(strformat("(%+f)").s("0755")
+	TEST1(strf("(%+f)").s("0755")
 		 , "(+493.000000)");
-	TEST1(strformat("(%f)").s("-0755")
+	TEST1(strf("(%f)").s("-0755")
 		 , "(-493.000000)");
-	TEST1(strformat("(%f)").s("00755")
+	TEST1(strf("(%f)").s("00755")
 		 , "(493.000000)");
-	TEST1(strformat("(%f)").s(nullptr)
+	TEST1(strf("(%f)").s(nullptr)
 		 , "((null))");
 
-	TEST1(strformat("(%f)").s("1.23456789e2")
+	TEST1(strf("(%f)").s("1.23456789e2")
 		  , "(123.456789)");
-	TEST1(strformat("(%f)").s("1.23456789e+2")
+	TEST1(strf("(%f)").s("1.23456789e+2")
 		  , "(123.456789)");
-	TEST1(strformat("(%f)").s("1.23456789e-2")
+	TEST1(strf("(%f)").s("1.23456789e-2")
 		  , "(0.012346)");
-	TEST1(strformat("(%f)").s("0.0123456789")
+	TEST1(strf("(%f)").s("0.0123456789")
 		  , "(0.012346)");
 
-	TEST1(strformat("%s").f(0.9, -1, 0)
+	TEST1(strf("%s").f(0.9, -1, 0)
 		 , "1");
-	TEST1(strformat("%s").f(9.9, -1, 0)
+	TEST1(strf("%s").f(9.9, -1, 0)
 		 , "10");
-	TEST1(strformat("%s").f(9.99, -1, 1)
+	TEST1(strf("%s").f(9.99, -1, 1)
 		 , "10");
 
-	TEST1(strformat("%s").f(-0.9, -1, 0)
+	TEST1(strf("%s").f(-0.9, -1, 0)
 		 , "-1");
-	TEST1(strformat("%s").f(-9.9, -1, 0)
+	TEST1(strf("%s").f(-9.9, -1, 0)
 		 , "-10");
-	TEST1(strformat("%s").f(-9.99, -1, 1)
+	TEST1(strf("%s").f(-9.99, -1, 1)
 		 , "-10");
 
 	// f (NAN/INF)
 
-	TEST1(strformat("(%f)").f(sqrt(-1))
+	TEST1(strf("(%f)").f(sqrt(-1))
 		 , "(#NAN)");
-	TEST1(strformat("(%10f)").f(sqrt(-1))
+	TEST1(strf("(%10f)").f(sqrt(-1))
 		 , "(      #NAN)");
-	TEST1(strformat("(%+10f)").f(sqrt(-1))
+	TEST1(strf("(%+10f)").f(sqrt(-1))
 		 , "(      #NAN)");
-	TEST1(strformat("(%-10f)").f(sqrt(-1))
+	TEST1(strf("(%-10f)").f(sqrt(-1))
 		 , "(#NAN      )");
-	TEST1(strformat("(%010f)").f(sqrt(-1))
+	TEST1(strf("(%010f)").f(sqrt(-1))
 		 , "(000000#NAN)");
 
-	TEST1(strformat("(%f)").f(log(0))
+	TEST1(strf("(%f)").f(log(0))
 		 , "(#INF)");
-	TEST1(strformat("(%10f)").f(log(0))
+	TEST1(strf("(%10f)").f(log(0))
 		 , "(      #INF)");
-	TEST1(strformat("(%+10f)").f(log(0))
+	TEST1(strf("(%+10f)").f(log(0))
 		 , "(      #INF)");
-	TEST1(strformat("(%-10f)").f(log(0))
+	TEST1(strf("(%-10f)").f(log(0))
 		 , "(#INF      )");
-	TEST1(strformat("(%010f)").f(log(0))
+	TEST1(strf("(%010f)").f(log(0))
 		 , "(000000#INF)");
 #endif
 
 	// c
 
-	TEST1(strformat("(%c)").c(65)
+	TEST1(strf("(%c)").c(65)
 		 , "(A)");
-	TEST1(strformat("(%10c)").c(65)
+	TEST1(strf("(%10c)").c(65)
 		 , "(         A)");
-	TEST1(strformat("(%010c)").c(65)
+	TEST1(strf("(%010c)").c(65)
 		 , "(000000000A)");
-	TEST1(strformat("(%-10c)").c(65)
+	TEST1(strf("(%-10c)").c(65)
 		 , "(A         )");
-	TEST1(strformat("(%*c)").c(65, 10)
+	TEST1(strf("(%*c)").c(65, 10)
 		 , "(         A)");
-	TEST1(strformat("(%0*c)").c(65, 10)
+	TEST1(strf("(%0*c)").c(65, 10)
 		 , "(000000000A)");
-	TEST1(strformat("(%-*c)").c(65, 10)
+	TEST1(strf("(%-*c)").c(65, 10)
 		 , "(A         )");
-	TEST1(strformat("%%%c%c%c%%").c(65).c(66).c(67)
+	TEST1(strf("%%%c%c%c%%").c(65).c(66).c(67)
 		 , "%ABC%");
 
 	// s
 
-	TEST1(strformat("(%s)").s("hoge")
+	TEST1(strf("(%s)").s("hoge")
 		 , "(hoge)");
-	TEST1(strformat("(%s)").s(std::string("hoge"))
+	TEST1(strf("(%s)").s(std::string("hoge"))
 		 , "(hoge)");
-	TEST1(strformat("(%10s)").s("hoge")
+	TEST1(strf("(%10s)").s("hoge")
 		 , "(      hoge)");
-	TEST1(strformat("(%-10s)").s("hoge")
+	TEST1(strf("(%-10s)").s("hoge")
 		 , "(hoge      )");
-	TEST1(strformat("(%010s)").s("hoge")
+	TEST1(strf("(%010s)").s("hoge")
 		 , "(000000hoge)");
-	TEST1(strformat("(%s)").s("")
+	TEST1(strf("(%s)").s("")
 		 , "()");
-	TEST1(strformat("(%s)").s(std::string())
+	TEST1(strf("(%s)").s(std::string())
 		 , "()");
-	TEST1(strformat("(%s)").s(nullptr)
+	TEST1(strf("(%s)").s(nullptr)
 		 , "((null))");
-	TEST1(strformat("(%10s)").s(nullptr)
+	TEST1(strf("(%10s)").s(nullptr)
 		, "(    (null))");
-	TEST1(strformat("(%-10s)").s(nullptr)
+	TEST1(strf("(%-10s)").s(nullptr)
 		, "((null)    )");
-	TEST1(strformat("(%010s)").s(nullptr)
+	TEST1(strf("(%010s)").s(nullptr)
 		, "(0000(null))");
-	TEST1(strformat("(%010s)").s("")
+	TEST1(strf("(%010s)").s("")
 		 , "(0000000000)");
-	TEST1(strformat("(%010s)").s(std::string())
+	TEST1(strf("(%010s)").s(std::string())
 		 , "(0000000000)");
 
-	TEST1(strformat("%s%s%s").s("abc").s("def").s("ghi")
+	TEST1(strf("%s%s%s").s("abc").s("def").s("ghi")
 		 , "abcdefghi");
-	TEST1(strformat("%s%s").s("abc").s("def").s("ghi")
+	TEST1(strf("%s%s").s("abc").s("def").s("ghi")
 		 , "abcdef");
-	TEST1(strformat("%s%s%s%s").s("abc").s("def").s("ghi")
+	TEST1(strf("%s%s%s%s").s("abc").s("def").s("ghi")
 		 , "abcdefghi%s");
-	TEST1(strformat("%s%s%s%s%").s("abc").s("def").s("ghi")
+	TEST1(strf("%s%s%s%s%").s("abc").s("def").s("ghi")
 		 , "abcdefghi%s%");
-	TEST1(strformat("%s%s%s%s%%").s("abc").s("def").s("ghi")
+	TEST1(strf("%s%s%s%s%%").s("abc").s("def").s("ghi")
 		 , "abcdefghi%s%");
-	TEST1(strformat("%s%s%s%s%%%").s("abc").s("def").s("ghi")
+	TEST1(strf("%s%s%s%s%%%").s("abc").s("def").s("ghi")
 		 , "abcdefghi%s%%");
-	TEST1(strformat("%%%s%s%s%s%%").s("abc").s("def")
+	TEST1(strf("%%%s%s%s%s%%").s("abc").s("def")
 		 , "%abcdef%s%s%");
 
 #ifndef STRFORMAT_NO_FP
-	TEST1(strformat("%.s").f(0.00123456)
+	TEST1(strf("%.s").f(0.00123456)
 		 , "0.001235");
-	TEST1(strformat("%.8s").f(0.00123456)
+	TEST1(strf("%.8s").f(0.00123456)
 		 , "0.00123456");
-	TEST1(strformat("%s").f(123.0)
+	TEST1(strf("%s").f(123.0)
 		 , "123");
-	TEST1(strformat("%s").f(123.456)
+	TEST1(strf("%s").f(123.456)
 		 , "123.456");
-	TEST1(strformat("%s").f(-0.00123456)
+	TEST1(strf("%s").f(-0.00123456)
 		 , "-0.001235");
-	TEST1(strformat("%.8s").f(-0.00123456)
+	TEST1(strf("%.8s").f(-0.00123456)
 		 , "-0.00123456");
-	TEST1(strformat("%s").f(-123.0)
+	TEST1(strf("%s").f(-123.0)
 		 , "-123");
-	TEST1(strformat("%s").f(-123.456)
+	TEST1(strf("%s").f(-123.456)
 		 , "-123.456");
 #endif
 
 	// p
 
-	TEST2(strformat("(%p)").p((void *)0)
+	TEST2(strf("(%p)").p((void *)0)
 		 , "(00000000)", "(0000000000000000)");
-	TEST2(strformat("(%p)").p((void *)0x0123abcd)
+	TEST2(strf("(%p)").p((void *)0x0123abcd)
 		 , "(0123ABCD)", "(000000000123ABCD)");
-	TEST2(strformat("(%20p)").p((void *)0x0123abcd)
+	TEST2(strf("(%20p)").p((void *)0x0123abcd)
 		 , "(            0123ABCD)", "(    000000000123ABCD)");
-	TEST2(strformat("(%-20p)").p((void *)0x0123abcd)
+	TEST2(strf("(%-20p)").p((void *)0x0123abcd)
 		 , "(0123ABCD            )", "(000000000123ABCD    )");
-	TEST1(strformat("(%020p)").p((void *)0x0123abcd)
+	TEST1(strf("(%020p)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
 
 	// p (abnormal)
 
-	TEST2(strformat("(%f)").p((void *)0)
+	TEST2(strf("(%f)").p((void *)0)
 		 , "(00000000)", "(0000000000000000)");
-	TEST2(strformat("(%f)").p((void *)0x0123abcd)
+	TEST2(strf("(%f)").p((void *)0x0123abcd)
 		 , "(0123ABCD)", "(000000000123ABCD)");
-	TEST2(strformat("(%20f)").p((void *)0x0123abcd)
+	TEST2(strf("(%20f)").p((void *)0x0123abcd)
 		 , "(            0123ABCD)", "(    000000000123ABCD)");
-	TEST2(strformat("(%-20f)").p((void *)0x0123abcd)
+	TEST2(strf("(%-20f)").p((void *)0x0123abcd)
 		 , "(0123ABCD            )", "(000000000123ABCD    )");
-	TEST1(strformat("(%020f)").p((void *)0x0123abcd)
+	TEST1(strf("(%020f)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
-	TEST2(strformat("(%s)").p((void *)0)
+	TEST2(strf("(%s)").p((void *)0)
 		 , "(00000000)", "(0000000000000000)");
-	TEST2(strformat("(%s)").p((void *)0x0123abcd)
+	TEST2(strf("(%s)").p((void *)0x0123abcd)
 		 , "(0123ABCD)", "(000000000123ABCD)");
-	TEST2(strformat("(%20s)").p((void *)0x0123abcd)
+	TEST2(strf("(%20s)").p((void *)0x0123abcd)
 		 , "(            0123ABCD)", "(    000000000123ABCD)");
-	TEST2(strformat("(%-20s)").p((void *)0x0123abcd)
+	TEST2(strf("(%-20s)").p((void *)0x0123abcd)
 		 , "(0123ABCD            )", "(000000000123ABCD    )");
-	TEST1(strformat("(%020s)").p((void *)0x0123abcd)
+	TEST1(strf("(%020s)").p((void *)0x0123abcd)
 		 , "(0000000000000123ABCD)");
 
 	// c
 
-	TEST1(strformat("(%c)").c('A')
+	TEST1(strf("(%c)").c('A')
 		 , "(A)");
-	TEST1(strformat("(%c)").c(48)
+	TEST1(strf("(%c)").c(48)
 		 , "(0)");
-	TEST1(strformat("(%c)").s("49")
+	TEST1(strf("(%c)").s("49")
 		 , "(1)");
-	TEST1(strformat("(%c)").s("062")
+	TEST1(strf("(%c)").s("062")
 		 , "(2)");
-	TEST1(strformat("(%c)").s("0x33")
+	TEST1(strf("(%c)").s("0x33")
 		 , "(3)");
-	TEST1(strformat("(%c)").s("0x4C")
+	TEST1(strf("(%c)").s("0x4C")
 		 , "(L)");
-	TEST1(strformat("(%c)").s("0X4d")
+	TEST1(strf("(%c)").s("0X4d")
 		 , "(M)");
-	TEST1(strformat("(%c)").s("0116")
+	TEST1(strf("(%c)").s("0116")
 		 , "(N)");
 }
 

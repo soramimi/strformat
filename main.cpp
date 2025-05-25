@@ -35,14 +35,14 @@ void test_(char const *text, std::string const &result, const char *answer1, con
 	} else if (answer2 && result == answer2) {
 		passed++;
 	} else {
-		strformat("[fail] %s expected '%s', but returned '%s', %s (%d)\n").s(text).s(answer1).s(result).s(file).d(line).err();
+		strf("[fail] %s expected '%s', but returned '%s', %s (%d)\n").s(text).s(answer1).s(result).s(file).d(line).err();
 		failed++;
 	}
 }
 
 void print_result()
 {
-	strformat("\n" " total: %d\n" "passed: %d\n" "failed: %d\n").d(total).d(passed).d(failed).err();
+	strf("\n" " total: %d\n" "passed: %d\n" "failed: %d\n").d(total).d(passed).d(failed).err();
 }
 
 void benchmark()
