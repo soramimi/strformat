@@ -37,20 +37,20 @@ Simply include the `strformat.h` header file in your project:
 
 int main() {
     // Format to string
-    std::string result = strformat("Hello, %s! The answer is %d.")
+    std::string result = strf("Hello, %s! The answer is %d.")
                         .s("world")
                         .d(42)
                         .str();
     std::cout << result << std::endl;
     
     // Direct output to stdout
-    strformat("Hello, %s! The answer is %d.")
+    strf("Hello, %s! The answer is %d.")
         .s("world")
         .d(42)
         .put();
         
     // Direct output to stderr
-    strformat("Error code: %d").d(-1).err();
+    strf("Error code: %d").d(-1).err();
     
     return 0;
 }
@@ -78,18 +78,18 @@ Various formatting options are available:
 
 ```cpp
 // Width and padding
-strformat("%10d").d(123);       // "       123"
-strformat("%010d").d(123);      // "0000000123"
-strformat("%-10d").d(123);      // "123       "
+strf("%10d").d(123);       // "       123"
+strf("%010d").d(123);      // "0000000123"
+strf("%-10d").d(123);      // "123       "
 
 // Sign control
-strformat("%+d").d(123);        // "+123"
+strf("%+d").d(123);        // "+123"
 
 // Precision for floating-point numbers
-strformat("%.2f").f(123.456);   // "123.46"
+strf("%.2f").f(123.456);   // "123.46"
 
 // Combined options
-strformat("%+10.2f").f(123.456); // "    +123.46"
+strf("%+10.2f").f(123.456); // "    +123.46"
 ```
 
 ## Method Chaining
@@ -97,7 +97,7 @@ strformat("%+10.2f").f(123.456); // "    +123.46"
 You can chain multiple formatting operations:
 
 ```cpp
-std::string result = strformat("Name: %s, Age: %d, Balance: $%.2f")
+std::string result = strf("Name: %s, Age: %d, Balance: $%.2f")
                     .s("John Doe")
                     .d(35)
                     .f(1234.567)
@@ -110,25 +110,25 @@ strformat provides several output options:
 
 ```cpp
 // Get as string
-std::string result = strformat("Value: %d").d(123).str();
+std::string result = strf("Value: %d").d(123).str();
 
 // Write to stdout
-strformat("Value: %d").d(123).put();
+strf("Value: %d").d(123).put();
 
 // Write to stderr
-strformat("Error: %d").d(123).err();
+strf("Error: %d").d(123).err();
 
 // Write to a FILE pointer
 FILE* fp = fopen("output.txt", "w");
-strformat("Value: %d").d(123).write_to(fp);
+strf("Value: %d").d(123).write_to(fp);
 fclose(fp);
 
 // Write to a file descriptor
-strformat("Value: %d").d(123).write_to(fd);
+strf("Value: %d").d(123).write_to(fd);
 
 // Append to a vector
 std::vector<char> buffer;
-strformat("Value: %d").d(123).vec(&buffer);
+strf("Value: %d").d(123).vec(&buffer);
 ```
 
 ## Build Options
@@ -137,6 +137,13 @@ To disable floating-point support (for smaller footprint):
 
 ```cpp
 #define STRFORMAT_NO_FP
+#include "strformat.h"
+```
+
+To disable locale support:
+
+```cpp
+#define STRFORMAT_NO_LOCALE
 #include "strformat.h"
 ```
 
@@ -162,4 +169,4 @@ Open the Visual Studio solution file `strformat.sln` and build the project.
 
 This software is distributed under the MIT license.
 
-Copyright (C) 2024 S.Fuchita (soramimi_jp)
+Copyright (C) 2025 S.Fuchita (soramimi_jp)
