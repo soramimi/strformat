@@ -6,3 +6,4 @@ Release
 _bin/
 build/
 *.o
+.qmake.stash
