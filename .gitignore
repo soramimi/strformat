@@ -7,3 +7,4 @@ _bin/
 build/
 *.o
 .qmake.stash
+Makefile

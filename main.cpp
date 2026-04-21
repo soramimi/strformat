@@ -35,14 +35,14 @@ void test_(char const *text, std::string const &result, const char *answer1, con
 	} else if (answer2 && result == answer2) {
 		passed++;
 	} else {
-		strf("[fail] %s expected '%s', but returned '%s', %s (%d)\n").s(text).s(answer1).s(result).s(file).d(line).err();
+		fmt("[fail] %s expected '%s', but returned '%s', %s (%d)\n").s(text).s(answer1).s(result).s(file).d(line).err();
 		failed++;
 	}
 }
 
 void print_result()
 {
-	strf("\n" " total: %d\n" "passed: %d\n" "failed: %d\n").d(total).d(passed).d(failed).err();
+	fmt("\n" " total: %d\n" "passed: %d\n" "failed: %d\n").d(total).d(passed).d(failed).err();
 }
 
 void benchmark()
@@ -52,7 +52,7 @@ void benchmark()
 	for (int i = 0; i < 10000; i++) {
 		test();
 	}
-	printf("%lldms\n", (unsigned long long)t.elapsed());
+	fprintf(stderr, "%lldms\n", (unsigned long long)t.elapsed());
 }
 
 int main()
@@ -65,8 +65,10 @@ int main()
 #if 1
 	test();
 	print_result();
-#elif 0
+
 	benchmark();
+
+
 #else
 	std::string s;
 	s = strformat()(13.42).str();
