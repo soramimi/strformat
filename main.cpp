@@ -53,7 +53,14 @@ void benchmark()
 	ElapsedTimer t;
 	t.start();
 	for (int i = 0; i < 10000; i++) {
+#if 1
 		test();
+#elif 0
+		fmt("s:%s f:%f d:%d\n")("Hello, world")(123.456)(789).str();
+#else
+		char tmp[1000];
+		sprintf(tmp, "s:%s f:%f d:%d\n", "Hello, world", 123.456, 789);
+#endif
 	}
 	fprintf(stderr, "%lldms\n", (unsigned long long)t.elapsed());
 }
