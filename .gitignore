@@ -5,6 +5,7 @@ Release
 *.suo
 _bin/
 build/
+.qtcreator/
 *.o
 .qmake.stash
 Makefile
