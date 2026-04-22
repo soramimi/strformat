@@ -126,9 +126,11 @@ fclose(fp);
 // Write to a file descriptor
 fmt("Value: %d").d(123).write_to(fd);
 
+// Get as vector
+std::vector<char> buffer = fmt("Value: %d").d(123).vec();
+
 // Append to a vector
-std::vector<char> buffer;
-fmt("Value: %d").d(123).vec(&buffer);
+fmt("Value: %d").d(123).append_to(&buffer);
 ```
 
 ## Build Options
