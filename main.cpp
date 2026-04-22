@@ -26,6 +26,7 @@ void test();
 int passed = 0;
 int failed = 0;
 int total = 0;
+bool report_error = true;
 
 void test_(char const *text, std::string const &result, const char *answer1, const char *answer2, char const *file, int line)
 {
@@ -34,7 +35,7 @@ void test_(char const *text, std::string const &result, const char *answer1, con
 		passed++;
 	} else if (answer2 && result == answer2) {
 		passed++;
-	} else {
+	} else if (report_error) {
 		fmt("[fail] %s expected '%s', but returned '%s', %s (%d)\n").s(text).s(answer1).s(result).s(file).d(line).err();
 		failed++;
 	}
@@ -47,6 +48,8 @@ void print_result()
 
 void benchmark()
 {
+	report_error = false;
+
 	ElapsedTimer t;
 	t.start();
 	for (int i = 0; i < 10000; i++) {
@@ -63,6 +66,7 @@ int main()
 	}
 
 #if 1
+	report_error = true;
 	test();
 	print_result();
 

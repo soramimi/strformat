@@ -37,20 +37,20 @@ Simply include the `strformat.h` header file in your project:
 
 int main() {
     // Format to string
-    std::string result = strf("Hello, %s! The answer is %d.")
+    std::string result = fmt("Hello, %s! The answer is %d.")
                         .s("world")
                         .d(42)
                         .str();
     std::cout << result << std::endl;
     
     // Direct output to stdout
-    strf("Hello, %s! The answer is %d.")
+    fmt("Hello, %s! The answer is %d.")
         .s("world")
         .d(42)
         .put();
         
     // Direct output to stderr
-    strf("Error code: %d").d(-1).err();
+    fmt("Error code: %d").d(-1).err();
     
     return 0;
 }
@@ -78,18 +78,18 @@ Various formatting options are available:
 
 ```cpp
 // Width and padding
-strf("%10d").d(123);       // "       123"
-strf("%010d").d(123);      // "0000000123"
-strf("%-10d").d(123);      // "123       "
+fmt("%10d").d(123);       // "       123"
+fmt("%010d").d(123);      // "0000000123"
+fmt("%-10d").d(123);      // "123       "
 
 // Sign control
-strf("%+d").d(123);        // "+123"
+fmt("%+d").d(123);        // "+123"
 
 // Precision for floating-point numbers
-strf("%.2f").f(123.456);   // "123.46"
+fmt("%.2f").f(123.456);   // "123.46"
 
 // Combined options
-strf("%+10.2f").f(123.456); // "    +123.46"
+fmt("%+10.2f").f(123.456); // "    +123.46"
 ```
 
 ## Method Chaining
@@ -97,7 +97,7 @@ strf("%+10.2f").f(123.456); // "    +123.46"
 You can chain multiple formatting operations:
 
 ```cpp
-std::string result = strf("Name: %s, Age: %d, Balance: $%.2f")
+std::string result = fmt("Name: %s, Age: %d, Balance: $%.2f")
                     .s("John Doe")
                     .d(35)
                     .f(1234.567)
@@ -110,25 +110,25 @@ strformat provides several output options:
 
 ```cpp
 // Get as string
-std::string result = strf("Value: %d").d(123).str();
+std::string result = fmt("Value: %d").d(123).str();
 
 // Write to stdout
-strf("Value: %d").d(123).put();
+fmt("Value: %d").d(123).put();
 
 // Write to stderr
-strf("Error: %d").d(123).err();
+fmt("Error: %d").d(123).err();
 
 // Write to a FILE pointer
 FILE* fp = fopen("output.txt", "w");
-strf("Value: %d").d(123).write_to(fp);
+fmt("Value: %d").d(123).write_to(fp);
 fclose(fp);
 
 // Write to a file descriptor
-strf("Value: %d").d(123).write_to(fd);
+fmt("Value: %d").d(123).write_to(fd);
 
 // Append to a vector
 std::vector<char> buffer;
-strf("Value: %d").d(123).vec(&buffer);
+fmt("Value: %d").d(123).vec(&buffer);
 ```
 
 ## Build Options
