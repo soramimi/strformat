@@ -1,11 +1,6 @@
-*.user
-Debug
-Release
-*.sdf
-*.suo
-_bin/
-build/
-.qtcreator/
+*.d
 *.o
 .qmake.stash
-Makefile
+a.out
+.qtcreator/
+build/
