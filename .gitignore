@@ -4,3 +4,5 @@
 a.out
 .qtcreator/
 build/
+_bin/
+*.user
