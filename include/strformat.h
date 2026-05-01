@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <string_view>
+#include <cstddef>
 
 #ifndef STRFORMAT_NO_LOCALE
 #include <locale.h>
@@ -1404,8 +1405,5 @@ public:
 };
 
 } // namespace strformat_ns
-
-// using strformat = strformat_ns::string_formatter;
-using fmt = strformat_ns::string_formatter;
 
 #endif // STRFORMAT_H

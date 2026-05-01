@@ -1,5 +1,5 @@
 
-#include "strformat.h"
+#include "fmt.h"
 #include <cmath>
 
 void test_(char const *text, std::string const &result, char const *answer1, char const *answer2, char const *file, int line);
