@@ -1,6 +1,7 @@
 
 #include "fmt.h"
 #include <chrono>
+#include <limits.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -81,9 +82,10 @@ int main()
 
 
 #else
-	std::string s;
-	s = strformat()(13.42).str();
-	puts(s.c_str());
+	fprintf(stderr, "%d\n", INT_MIN);
+	fmt("%d\n").d(INT_MIN).err();
+	fprintf(stderr, "%lld\n", LONG_LONG_MIN);
+	fmt("%ld\n").ld(LONG_LONG_MIN).err();
 #endif
 	return 0;
 }

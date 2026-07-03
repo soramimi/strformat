@@ -1,6 +1,7 @@
 
 #include "fmt.h"
 #include <cmath>
+#include <limits>
 
 void test_(char const *text, std::string const &result, char const *answer1, char const *answer2, char const *file, int line);
 
@@ -16,16 +17,30 @@ void test()
 		 , "(0000123.46)");
 #endif
 
+#ifndef STRFORMAT_NO_FP
 	TEST1(fmt()(12.34)
 		 , "");
 
 	TEST1(fmt("a")(12.34)
+		 , "a");
+#endif
+
+	TEST1(fmt()(1234)
+		 , "");
+
+	TEST1(fmt("a")(1234)
 		 , "a");
 
 	// d
 
 	TEST1(fmt("%d").d(0)
 		 , "0");
+	TEST1(fmt("%d").d(std::numeric_limits<int32_t>::min())
+		 , "-2147483648");
+	TEST1(fmt("%ld").ld(std::numeric_limits<int64_t>::min())
+		 , "-9223372036854775808");
+	TEST1(fmt("%d").s("-2147483648")
+		 , "-2147483648");
 	TEST1(fmt("%d").d(123)
 		 , "123");
 	TEST1(fmt("%d").d(-123)
