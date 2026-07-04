@@ -1,3 +1,4 @@
+include(common.pri)
 TEMPLATE = app
 CONFIG += console c++17
 CONFIG -= app_bundle
@@ -5,8 +6,11 @@ CONFIG -= qt
 
 DESTDIR = $$PWD/../_bin
 
-gcc:QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined
-gcc:LIBS += -lubsan
+# CONFIG += ubsan
+ubsan {
+    gcc:QMAKE_CXXFLAGS += -fsanitize=undefined
+    gcc:LIBS += -lubsan
+}
 
 INCLUDEPATH += $$PWD/../include
 
@@ -17,4 +21,5 @@ SOURCES += \
     ../test.cpp
 
 HEADERS += \
-    ../include/strformat.h
+    ../include/strformat.h \
+    pragma.h

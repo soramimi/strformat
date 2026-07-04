@@ -47,16 +47,33 @@ public:
 	}
 };
 
+/**
+ * @brief Fast arena allocator for short-lived formatting data.
+ *
+ * Memory is carved out of a fixed 256-byte in-object buffer first; once it
+ * is exhausted, additional blocks are obtained with `malloc()`.  All blocks
+ * are chained in a singly linked list whose head is the in-object buffer.
+ * `free()` is a no-op: the formatter allocates many small pieces that all
+ * die together, so the heap blocks are released in one sweep by the
+ * destructor instead of being tracked individually.
+ */
 class QuickAlloc {
 private:
 	constexpr static size_t default_buffer_size = 256;
 	constexpr static size_t alignment = alignof(std::max_align_t);
+	// Bookkeeping placed at the top of every block; the block's usable
+	// memory follows immediately after.
 	struct Header {
-		Header *next = nullptr;
-		size_t capacity = 0;
-		size_t allocated = 0;
+		Header *next = nullptr; // singly linked list of blocks
+		size_t capacity = 0;    // usable bytes in this block
+		size_t allocated = 0;   // bytes handed out so far
 	};
+	// First block of the list. Lives inside the allocator object itself
+	// (typically on the stack), so small formatting jobs never touch the heap.
 	alignas(std::max_align_t) char default_buffer[default_buffer_size];
+
+	static_assert(sizeof(default_buffer) > sizeof(Header), "default_buffer too small");
+	
 	void *x_alloc(size_t size)
 	{
 		return ::malloc(size);
@@ -78,10 +95,13 @@ public:
 	{
 		Header *h = (Header *)default_buffer;
 		*h = {};
+		size_t n = sizeof(Header);
 		h->capacity = sizeof(default_buffer) - sizeof(Header);
 	}
 	~QuickAlloc()
 	{
+		// Release every heap block; the first block is the in-object
+		// buffer and must not be freed.
 		Header *h = (Header *)default_buffer;
 		Header *next = h->next;
 		while (next) {
@@ -90,6 +110,34 @@ public:
 			x_free(p);
 		}
 	}
+	/**
+	 * @brief Allocate `size` bytes from the arena.
+	 *
+	 * Only the first two blocks of the list are probed for free space: the
+	 * in-object buffer and, if present, the newest standard heap block.
+	 * The insertion policy below pushes exhausted blocks to third place
+	 * and beyond, and a block only gets displaced after failing a request,
+	 * i.e. when its remaining space is already smaller than that request.
+	 * Blocks past the second therefore have little or no free space left,
+	 * so scanning them would rarely pay off; capping the search keeps
+	 * allocation O(1) no matter how many blocks have accumulated.
+	 *
+	 * When both probes fail, a new block is added:
+	 * - A request that fits in a standard block (`default_buffer_size`
+	 *   bytes including the header) gets one, inserted right behind the
+	 *   in-object buffer so that it becomes the primary heap block for
+	 *   subsequent allocations.
+	 * - A larger request gets a dedicated block sized exactly for it.
+	 *   Such a block is born completely full, so it is inserted behind
+	 *   the current heap block (third place) to keep the two-block search
+	 *   window free of blocks that can never satisfy anything.
+	 *
+	 * Sizes are rounded up to `alignof(std::max_align_t)` granularity, but
+	 * the usable memory starts at offset `sizeof(Header)`, so returned
+	 * pointers are only guaranteed to be aligned to `alignof(Header)`
+	 * (pointer alignment) -- sufficient for the Part records stored here,
+	 * but this is not a general-purpose max-aligned allocator.
+	 */
 	void *alloc(size_t size)
 	{
 		if (size == 0) size = 1;
@@ -103,18 +151,26 @@ public:
 			}
 			return nullptr;
 		};
+		// 1st probe: the in-object buffer
 		void *p = Alloc();
 		if (p) return p;
+		// 2nd probe: the newest heap block, if any
 		if (h->next) {
 			h = h->next;
 			p = Alloc();
 			if (p) return p;
 		}
+		// Both probes failed: allocate a new block. `h` is where the new
+		// block gets linked in (the new block follows `h`).
 		h = (Header *)default_buffer;
 		size_t bufsize = sizeof(Header) + size;
 		if (bufsize < default_buffer_size) {
+			// standard block: insert as the new 2nd block, displacing the
+			// old one out of the search window
 			bufsize = default_buffer_size;
 		} else if (h->next) {
+			// oversized block, exactly filled by this request: insert as
+			// the 3rd block so it never occupies the search window
 			h = h->next;
 		}
 		Header *next = (Header *)x_alloc(bufsize);
@@ -725,7 +781,7 @@ private:
 		bool zero_padding : 1;
 		bool align_left : 1;
 		bool plus : 1;
-		int width;
+		int width = 0;
 		int precision;
 		int lflag;
 		Option_ opt;
@@ -1107,18 +1163,8 @@ private:
 public:
 	string_formatter(string_formatter const &) = delete;
 	void operator = (string_formatter const &) = delete;
-
-	string_formatter(string_formatter &&r)
-	{
-		q = r.q;
-		r._init();
-	}
-	void operator = (string_formatter &&r)
-	{
-		clear();
-		q = r.q;
-		r._init();
-	}
+	string_formatter(string_formatter &&r) = delete;
+	void operator = (string_formatter &&r) = delete;
 
 	string_formatter(int flags = 0, std::string_view text = {})
 	{
@@ -1151,6 +1197,7 @@ public:
 		q.text = text.empty() ? std::string_view("") : text;
 		q.head = q.text.data();
 		q.next = q.head;
+		reset_format_params();
 
 #ifndef STRFORMAT_NO_LOCALE
 		use_locale(flags & Locale);
