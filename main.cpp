@@ -73,19 +73,19 @@ int main()
 		if (p) puts(p);
 	}
 
-#if 1
-	report_error = true;
-	test();
-	print_result();
+	if (0) {
+		fmt("%d").s("-2147483648").err();
+	}
 
-	benchmark();
+	{
+		report_error = true;
+		test();
+		print_result();
+	}
 
+	{
+		benchmark();
+	}
 
-#else
-	fprintf(stderr, "%d\n", INT_MIN);
-	fmt("%d\n").d(INT_MIN).err();
-	fprintf(stderr, "%lld\n", LONG_LONG_MIN);
-	fmt("%ld\n").ld(LONG_LONG_MIN).err();
-#endif
 	return 0;
 }

@@ -5,8 +5,8 @@ CONFIG -= qt
 
 DESTDIR = $$PWD/../_bin
 
-QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined
-LIBS += -lubsan
+gcc:QMAKE_CXXFLAGS += -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined
+gcc:LIBS += -lubsan
 
 INCLUDEPATH += $$PWD/../include
 

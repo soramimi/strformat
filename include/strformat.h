@@ -309,8 +309,11 @@ template <typename T> static inline T parse_number(char const *ptr, std::functio
 		} else {
 			v = -v;
 		}
+		return v;
+	} else {
+
+		return v;
 	}
-	return v;
 }
 
 struct Option_ {
@@ -332,8 +335,8 @@ template <> inline char num<char>(char const *value, Option_ const &opt)
 template <> inline int32_t num<int32_t>(char const *value, Option_ const &opt)
 {
 	(void)opt;
-	return parse_number<int32_t>(value, [](char const *p, int radix){
-		return strtol(p, nullptr, radix);
+	return parse_number<uint32_t>(value, [](char const *p, int radix){
+		return strtoul(p, nullptr, radix);
 	});
 }
 template <> inline uint32_t num<uint32_t>(char const *value, Option_ const &opt)
@@ -346,8 +349,8 @@ template <> inline uint32_t num<uint32_t>(char const *value, Option_ const &opt)
 template <> inline int64_t num<int64_t>(char const *value, Option_ const &opt)
 {
 	(void)opt;
-	return parse_number<int64_t>(value, [](char const *p, int radix){
-		return strtoll(p, nullptr, radix);
+	return parse_number<uint64_t>(value, [](char const *p, int radix){
+		return strtoull(p, nullptr, radix);
 	});
 }
 template <> inline uint64_t num<uint64_t>(char const *value, Option_ const &opt)
@@ -523,17 +526,15 @@ private:
 		if (val == 0) {
 			*--ptr = '0';
 		} else {
-			if (val == std::numeric_limits<decltype(val)>::min()) {
-				*--ptr = '8';
-				val /= 10;
-			}
 			bool sign = (val < 0);
+			using U = std::make_unsigned_t<decltype(val)>;
+			U u = (U)val;
 			if (sign) {
-				val = -val;
+				u = -u;
 			}
-			while (val != 0) {
-				int c = val % 10 + '0';
-				val /= 10;
+			while (u != 0) {
+				int c = u % 10 + '0';
+				u /= 10;
 				*--ptr = c;
 			}
 			if (sign) {
@@ -574,16 +575,14 @@ private:
 		if (val == 0) {
 			*--ptr = '0';
 		} else {
-			if (val == std::numeric_limits<decltype(val)>::min()) {
-				*--ptr = '8';
-				val /= 10;
-			}
 			bool sign = (val < 0);
-			if (sign) val = -val;
+			using U = std::make_unsigned_t<decltype(val)>;
+			U u = (U)val;
+			if (sign) u = -u;
 
-			while (val != 0) {
-				int c = val % 10 + '0';
-				val /= 10;
+			while (u != 0) {
+				int c = u % 10 + '0';
+				u /= 10;
 				*--ptr = c;
 			}
 			if (sign) {
@@ -751,7 +750,8 @@ private:
 				q.head = q.next;
 			}
 		};
-		while (q.next < q.text.end()) {
+		char const *end = q.text.data() + q.text.size();
+		while (q.next < end) {
 			if (*q.next == '%') {
 				if (q.next[1] == '%') {
 					q.next++;

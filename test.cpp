@@ -115,6 +115,16 @@ void test()
 	TEST1(fmt("%012u").u(0xffffffff)
 		 , "004294967295");
 
+	// ld
+
+	TEST1(fmt("%ld").ld(0)
+		 , "0");
+	TEST1(fmt("%ld").ld(std::numeric_limits<int32_t>::min())
+		 , "-2147483648");
+	TEST1(fmt("%ld").ld(std::numeric_limits<int64_t>::min())
+		 , "-9223372036854775808");
+
+
 #ifndef STRFORMAT_NO_FP
 	// f (zero)
 
